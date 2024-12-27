@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/index.css" />
+    <script defer src="/static/index.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Tracker</title>
+</head>
+<body>
+    <div id="main">
+        <div id="input" class="box">
+            <p class="title">Quick Actions</p>
+            <div id="first">     
+                <div id="buttons">
+                    <button>Add item</button>
+                    <button>Add box</button>
+                    <button onClick="addLocation()">Add/Edit Location</button>
+                </div>
+            </div>
+        </div>
+        <div id="items" class="box"></div>
+        <div id="boxes" class="box"></div>
+        <div id="locations" class="box">
+            
+        </div>
+    </div>
+    <div id="locationPopup" class="popup">
+        <div class="container">
+            <div id="locationBarcode">
+                <div id="scan">
+                    <p>scan barcode:</p>
+                    <input id="barcodeInput">
+                    <p></p><!-- for formating, do not remove-->
+                    <button id="submit" onClick="submitBarcode()">submit</button>
+                </div>
+                <p class="or">OR</p>
+                <div id="generate">
+                    <button onClick="generateNewBarcode()">Generate New Barcode</button>
+
+
+                </div>
+            </div>
+            <div id="locationInfo">
+                <img id="barcodeImg"></img>
+                <button onClick="printBarcode()">print barcode</button>
+                <p>name:</p>
+                <input id="nameInput">
+                <p>description:</p>
+                <textarea id="descriptionInput"></textarea>
+                <button id="finish"onClick="finishLocation()">finish</button>
+            </div>
+        </div>
+    </div>
+</body>
