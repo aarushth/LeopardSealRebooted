@@ -55,6 +55,7 @@ async function processSubmissionBarcode(code){
         document.getElementById("nameInput").value = data.name;
         document.getElementById("descriptionInput").value = data.description;
         document.getElementById("finishDiv").innerHTML = ` <button id="finish" onClick="finishLocation(${code})">finish</button>`
+        document.getElementById("printDiv").innerHTML = `<button id="print"onClick="printBarcode(${code})">print barcode</button>`
     })
     
     document.getElementById("barcodeImg").src = getBarcodeSrc(code);
@@ -91,8 +92,8 @@ function getBarcodeSrc(code){
     return `https://barcode.orcascan.com/?type=code39&data=${code}&format=jpeg&text=${code}`;
 }
 
-function printBarcode(){
-    var imageUrl = getBarcodeSrc(barcode)
+function printBarcode(code){
+    var imageUrl = getBarcodeSrc(code)
     var printWindow = window.open('', '_blank', 'width=600,height=600');
   
     // Insert the image into the new window
