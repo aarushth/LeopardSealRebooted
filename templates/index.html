@@ -13,9 +13,10 @@
             <p class="title">Quick Actions</p>
             <div id="first">     
                 <div id="buttons">
-                    <button>Add item</button>
-                    <button>Add box</button>
+                    <button>(emptyButton)</button>
+                    <button onCLick="resetDB()">Reset Database</button>
                     <button onClick="addLocation()">Add/Edit Location</button>
+                    <button>(emptyButton)</button>
                 </div>
             </div>
         </div>
@@ -26,7 +27,11 @@
         </div>
     </div>
     <div id="locationPopup" class="popup">
+        
         <div class="container">
+            <div class="xButtonDiv">
+                <button onClick="exitPopup()"class="x">X</button>
+            </div>
             <div id="locationBarcode">
                 <div id="scan">
                     <p>scan barcode:</p>
@@ -35,20 +40,46 @@
                     <button id="submit" onClick="submitBarcode()">submit</button>
                 </div>
                 <p class="or">OR</p>
-                <div id="generate">
+                <!-- <div id="generate">
                     <button onClick="generateNewBarcode()">Generate New Barcode</button>
+                </div> -->
+                <div id="select">
+                    <p>select location:</p>
+                    <div id="locationsSelect">
+                        <!-- <div class='loc'>
+                            <button><img src='/resources/right-arrow-svgrepo-com.png'></button>
+                            <p>nameis very long</p>
+                            <p id='code'>123456789876</p>
+                        </div> -->
 
-
+                    </div>
                 </div>
             </div>
             <div id="locationInfo">
+                <img id="locImg" src="/resources/imageTemplate.png"></img>
                 <img id="barcodeImg"></img>
-                <button onClick="printBarcode()">print barcode</button>
-                <p>name:</p>
-                <input id="nameInput">
-                <p>description:</p>
-                <textarea id="descriptionInput"></textarea>
-                <button id="finish"onClick="finishLocation()">finish</button>
+                <button id="print"onClick="printBarcode()">print barcode</button>
+                
+                <div id="inputDiv">
+                    <p>name:</p>
+                    <input id="nameInput">
+                    <p>description:</p>
+                    <textarea id="descriptionInput"></textarea>
+                </div>
+                <div id="historyDiv">
+                    <div id="titleDiv"><p class='title'>History</p></div>
+                    <div id="headerEntry" class="entry">
+                        <b id='nameDiv' class='subEntry'>Name</b>
+                        <b id='descDiv' class='subEntry'>Description</b>
+                        <b id='boxDiv' class='subEntry'>Boxes</b>
+                        <b id='timeDiv' class='subEntry'>Time</b>
+                        <b id='versDiv' class='subEntry'>Version</b>
+                    </div>
+
+                </div>
+                <div id="finishDiv">
+                    <button id="finish" onClick="finishLocation()">finish</button>
+                </div>
             </div>
         </div>
     </div>

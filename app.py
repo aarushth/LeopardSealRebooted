@@ -283,7 +283,18 @@ def pull_location_history(code)->list[tuple]:
     conn = getConn()
     cur =  conn.cursor()
     cur.execute(f""" SELECT * FROM location WHERE barcode='{code}' ORDER BY vers DESC;""")
-    return  cur.fetchall()
+    fetch = cur.fetchall()
+    response = {"locations":[]}
+    for item in fetch:
+        print(item)
+        response["locations"].append({"barcode": item[0],
+                    "name": item[1],
+                    "description": item[2],
+                    "boxcode": item[3],
+                    "time": item[4],
+                    "vers": item[5]})
+    return jsonify(response),200
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5502) 
