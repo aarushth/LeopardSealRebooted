@@ -298,10 +298,3 @@ def pull_location_history(code)->list[tuple]:
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5502) 
-#d = Database()
-#d.reset_database()
-#d.print_out()
-
-#DONT DELETE THIS LINE, IT SCREWS SHIT UP
-#d.quit()
-

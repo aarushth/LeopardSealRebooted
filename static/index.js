@@ -129,20 +129,17 @@ function updateLocations(){
         // console.log(location)
         div.innerHTML += 
         `<div class='location' id='${location.barcode}'>
-            <img class='locArrowSVG' onClick='processSubmissionBarcode(${location.barcode})' src='/resources/edit-button-svgrepo-com.png'>
-            <div class='imgHead'>
-                <div class='images'>
-                    <img class='locImg' src='/resources/imageTemplate.png'>
-                </div>
-                <div class='header'>
-                    <div class='locName'>
-                        <p>${location.name}</p>
-                    </div>
-                    <p class='locBarcode'>${location.barcode}</p>
-                </div>
-                
+            <div class='images'>
+                <img class='locImg' src='/resources/imageTemplate.png'>
             </div>
-            <p class='locDescription'>${location.description}</p>
+            <div class='header'>
+                <p class='locName'>${location.name}</p>
+                <p class='locBarcode'>${location.barcode}</p>
+                <p class='locDescription'>${location.description}</p>
+            </div>
+            <div class='locArrowSVG'>
+                <img onClick='processSubmissionBarcode(${location.barcode})' src='/resources/edit-button-svgrepo-com.png'>
+            </div>
         </div>`
       }
     })

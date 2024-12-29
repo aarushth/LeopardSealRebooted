@@ -1,7 +1,9 @@
 :root {
-    --accent: aqua;
+    --accent: #007bff;
+    --accentHover: #0056b3;
     --popupOverlay:rgba(0, 0, 0, 0.5);
   }
+
 body{
     overflow-x: hidden;  
     background-color: var(--accent); 
@@ -9,6 +11,16 @@ body{
     width: 100vw;
     height: fit-content;
     margin: 0;
+}
+button{
+    border: none;
+    border-radius: 4px;
+    background-color: var(--accent);
+    font-size: 1.5vw;
+    color: white;
+}
+button:hover{
+    background-color: var(--accentHover);
 }
 p{
     margin: 0;
@@ -21,55 +33,59 @@ p{
     height: fit-content;
     justify-content: space-evenly;
     width: 100%;
-    margin-top: 0.5%;
+    margin-top: 0.3%;
     
     .box{
-        padding-inline: 0.5%;
-
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        background-color: white;
-        border-radius: 10px;
+        position: relative;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        /* border: 1px solid #ced4da; */
+        /* background-image: linear-gradient(135deg, aqua, rgb(47, 168, 168)); */
+        background: white;
         overflow-y:auto;
         /* overflow-x:hidden; */
-        height:50vh ;
-        width: 48%;
+        height:48vh;
+        width: 49%;
         margin-bottom: 1%;
-        margin-inline: 0.5%;
+        /* margin-inline: 0.5%; */
         .title{
-            position:sticky;
+            position:relative;
             font-size: 2vw;
             width: 100%;
-            margin-block: 5%;
+            height: fit-content;
+            margin-block:0;
+            margin-top: 5%;
+            /* margin-block: 5%; */
             text-align: center;
+            
         }
     }
     #input{
-        /* display: flex; */
-        /* flex-wrap: wrap; */
-        justify-content: center; 
-        #first{
+        /* justify-content: flex-start;  */
+        #buttons{
             position: relative;
-            visibility: visible;
-            #buttons{
-                position: relative;
-                width: 96%;
-                margin-inline:2%;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: flex-start;
-                button{
-                    width: 30%;
-                    height: 9vh;
-                    margin-inline:0.5%;
-                    margin-top: 0.5%;
-                    margin-bottom: 0.5%;
-                    background-color: var(--accent);
-                    border-radius: 20px;
-                }
+            width: 100%;
+            height: fit-content;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content:space-evenly;
+            margin-top: 5%;
+            button{
+                width: 30%;
+                height: 9vh;
+                /* margin-inline:0.5%; */
+                
+                margin-bottom: 0.5%;
+                /* background-color: var(--accent); */
+                
             }
-        }  
+        }
+    }
+    #locations{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        padding-bottom: 2%;
     }
 }
 #locationPopup{
@@ -88,7 +104,7 @@ p{
         
         margin-inline: 8%;
         margin-top: 2%;
-        border-radius: 20px;
+        
         padding: 2%;
         .xButtonDiv{
             display: flex;
@@ -109,6 +125,7 @@ p{
             width: inherit;
             visibility: hidden;
             margin-top: 5%;
+            font-size: 1.5vw;
             #scan{
                 position: relative;
                 display: flex;
@@ -121,7 +138,8 @@ p{
                     height: fit-content;
                 }
                 input{
-                    width:65%;
+                    font-size: 1.5vw;
+                    width:100%;
                     height: 20%;
                 }
                 #submit{
@@ -149,7 +167,7 @@ p{
                         margin-inline: 2%;
                         margin-bottom: 3%;
                         button{  
-                            border-radius: 4px;
+                            
                             width:100%;
                             padding: 0;
                             border: 0;
@@ -157,7 +175,6 @@ p{
                             height: fit-content;
                             img{
                                 width: 100%;
-                                border-radius: 4px;
                             }
                         }
                         p{
@@ -244,31 +261,40 @@ p{
             #inputDiv{
                 display: flex;
                 flex-wrap: wrap;
+    
                 margin-top: 5%;
                 width: 50%;
                 height: fit-content;
-                p{
+                max-height: 35vh;
+                
+                /* p{
                     width: 25%;
-                    /* margin-top: 1%; */
+                    margin-top: 1%; 
                     margin-bottom: 3%;
-                }
+                } */
                 input{
-                    width:65%;
+                    font-size: 1.5vw;
+                    width:100%;
                     height: fit-content;
                     margin-top: 1%;
+                    margin-bottom: 2%;
                 }
                 textarea{
-                    width:65%;
-                    max-width: 65%;
-                    min-width: 65%;
-                    height: 20vh;
+                    font-size: 1.5vw;
+                    width:99%;
+                    max-width: 99%;
+                    min-width: 99%;
+                    height: 15vh;
                     overflow-y: scroll;
                     
                 }
             }
             #historyDiv{
-                width: 50%;
+                width: 48%;
+                margin-left: 2%;
                 height: fit-content;
+                max-height: 35vh;
+                overflow-y: auto;
                 display: flex;
                 flex-wrap: wrap;
                 #titleDiv{
@@ -283,6 +309,8 @@ p{
                     display: flex;
                     flex-wrap: wrap;
                     width: 100%;
+                    border-bottom: 1px solid grey;
+                    padding-bottom: 1%;
                     height: fit-content;
                     #nameDiv{
                         width:15%;
@@ -303,14 +331,15 @@ p{
                         width: 10%;
                     }
                     .subEntry{
-                        font-size: 1.1vw;
-                        word-wrap: break-word;
-                        overflow-x:none;
+                        font-size: 1vw;
+                        max-height: 4vw;
+                        overflow-y: auto;
+                        /* overflow-x:none;
                         overflow-y: auto;
                         display: -webkit-box;
                         -webkit-line-clamp: 3;
                         -webkit-box-orient: vertical;
-                        margin-block: 0;
+                        text-overflow: clip; */
                     }
                 }
             }
@@ -322,82 +351,78 @@ p{
 .location{
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-evenly;
-    background-color: aqua;
-    width: 44%;
+    justify-content:space-evenly;
+    background-color: rgba(0, 0, 0, 0.3);
+    height: fit-content;
+    width: 47%;
+    padding: 1%;
+    margin-top: 0.5%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    /* border: 1px solid #ced4da; */
     border-radius: 10px;
-    margin-left:0.5%;
-    margin-right: 0.5%;
-    padding-left: 2%;
-    padding-top: 4%;
-    padding-right: 2%;
-    padding-bottom: 4%;
-    margin-top: 2%;
-    margin-bottom: 2%;
     .locArrowSVG{
-        margin-top: 1.5vh;
+        /* margin-top: 1.5vh; */
         width:15%;
-        margin-right: 3%;
-        height: fit-content;
-        scale:0.7;
         
+        height: fit-content;
+        margin-top: 5%;
+        /* margin-right: 3%; */
+        background-color: var(--accent);
+        border-radius: 50%;
+        img{
+            
+            width: 100%;
+            height: 50%;
+            scale:0.5;
+        }
     }
     .locArrowSVG:hover{
-        scale:0.9;
+        scale:1.2;
     }
-    .imgHead{
-        width:82%;
-        display: flex;
-        flex-wrap: wrap;
-        .images{
-            width: 40%;
-            padding: 0;
-            .locImg{
-                background-color: rgb(255, 127, 127);
-                width: 100%;
-                height: fit-content;
-                max-height: 20vh;
-                /* padding-bottom: 10%; */
-                font-size: 1vw;
-            }
+    .images{
+        width: 30%;
+        padding: 0;
+        .locImg{
+            border-radius: 8px;
+            background-color: rgb(255, 127, 127);
+            width: 100%;
+            height: fit-content;
+            max-height: 20vh;
+            /* padding-bottom: 10%; */
         }
-        .header{
-            margin-left: 5%;
-            width:55%;
-            .locName{
-                display: flex;
-                margin: 0;
-                height: fit-content;
-                font-size: 1.8vw;
-                width:100%;
-                text-align: start;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-            }
-            .locBarcode{
-                display:flex;
-                
-                font-size: 0.9vw;
-                width: 100%;
-                text-align: start;
-            }   
+    }
+    .header{
+        width:45%;
+        .locName{
+            display: flex;
+            margin: 0;
+            height: fit-content;
+            font-size: 1.5vw;
+            width:100%;
+            text-align: start;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+        }
+        .locBarcode{
+            display:flex;
+            
+            font-size: 0.9vw;
+            width: 100%;
+            text-align: start;
+        }   
+        .locDescription{
+            margin-top: 5%;
+            font-size: 1vw;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
         
     }
-    .locDescription{
-        font-size: 1.2vw;
-        width: 100%;
-        height: 20%;
-        margin-left: 10%;
-        
-        overflow-wrap: break-word;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-    }
+
 }
