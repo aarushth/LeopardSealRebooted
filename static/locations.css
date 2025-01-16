@@ -32,7 +32,6 @@ button:hover{
     /* height: fit-content;s */
     width: 47%;
     min-height:23vh;
-    height: fit-content;
     /* padding-block: 1%; */
     /* padding-inline: 2%; */
     margin-top: 0.5%;
@@ -44,6 +43,7 @@ button:hover{
         flex-wrap: wrap;
         width:15%;
         height: 98%;
+        justify-content: center;
         align-items: center;
         .locArrowSVG{
             /* margin-top: 1.5vh; */
