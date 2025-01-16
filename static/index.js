@@ -41,12 +41,10 @@ function addLocation(){
 }
 
 function generateNewBarcode(){
-    processSubmissionBarcode(Math.floor(Math.random()*(Math.pow(10, 12))));
-    
+    processSubmissionBarcode(Math.floor(Math.random()*(Math.pow(10, 12)))); 
 }
 
 function submitBarcode(){
-    
     processSubmissionBarcode(document.getElementById('barcodeInput').value)
 }
 async function processSubmissionBarcode(code){
@@ -59,7 +57,7 @@ async function processSubmissionBarcode(code){
     .then(data => {
         document.getElementById("nameInput").value = data.name;
         document.getElementById("descriptionInput").value = data.description;
-        document.getElementById("finishDiv").innerHTML = ` <button id="finish" onClick="finishLocation(${code})">finish</button>`
+        document.getElementById("finishDiv").innerHTML = ` <button id="finish" onClick="finishLocationMain(${code})">finish</button>`
         document.getElementById("printDiv").innerHTML = `<button id="print"onClick="printBarcode(${code})">print barcode</button>`
         document.getElementById("imgButtonDiv").innerHTML = `<button id="imgButton" onClick="camera(${code})">Add/Change Image</button>`
         document.getElementById("locImg").src = data.image != ""?data.image:"/resources/imageTemplate.png";
@@ -117,7 +115,7 @@ function printBarcode(code){
 }
 
 let imageChange = false;
-async function finishLocation(code){
+async function finishLocationMain(code){
     let im = document.getElementById("locImg").src
     console.log(im);
     const data = {
