@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="/static/index.css" />
+    <link rel="stylesheet" href="/static/popups.css" />
     <script defer src="/static/index.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Tracker</title>
@@ -12,23 +13,18 @@
         <div id="input" class="box">
             <p class="title">Quick Actions</p>     
             <div id="buttons">
-                <button>(emptyButton)</button>
+                <button onClick="printDB()">Print Database</button>
                 <button onCLick="resetDB()">Reset Database</button>
                 <button onClick="addLocation()">Add/Edit Location</button>
-                <button>(emptyButton)</button>
+                <button onclick="location.href='locations.html'">Locations</button>
             </div>
-        </div>
-        <div id="items" class="box"></div>
-        <div id="boxes" class="box"></div>
-        <div id="locations" class="box">
-            
         </div>
     </div>
     <div id="locationPopup" class="popup">
         
         <div class="container">
             <div class="xButtonDiv">
-                <button onClick="exitPopup()"class="x">X</button>
+                <button onClick="exitLocationPopup()"class="x">X</button>
             </div>
             <div id="locationBarcode">
                 <div id="scan">
@@ -40,9 +36,9 @@
                 <!-- <div id="generate">
                     <button onClick="generateNewBarcode()">Generate New Barcode</button>
                 </div> -->
-                <div id="select">
+                <div id="select" class="selectMain">
                     <p>Select location:</p>
-                    <div id="locationsSelect">
+                    <div id="locationsSelect" class="selectSub">
                         <!-- <div class='loc'>
                             <button><img src='/resources/right-arrow-svgrepo-com.png'></button>
                             <p>nameis very long</p>
@@ -53,10 +49,15 @@
                 </div>
             </div>
             <div id="locationInfo">
-                <img id="locImg" src="/resources/imageTemplate.png"></img>
-                <img id="barcodeImg"></img>
-                <div id="printDiv">
-                    <button id="print"onClick="printBarcode()">Print Barcode</button>
+                <div id="topDiv">
+                    <img id="locImg" src=""></img>
+                    <div id="imgButtonDiv">
+                        <button id="imgButton" onClick="camera()">Add/Change Image</button>
+                    </div>
+                    <img id="barcodeImg"></img>
+                    <div id="printDiv">
+                        <button id="print" onClick="printBarcode()">Print Barcode</button>
+                    </div>
                 </div>
                 <div id="inputDiv">
                     <!-- <p>name:</p> -->
@@ -75,8 +76,87 @@
                     </div>
 
                 </div>
-                <div id="finishDiv">
-                    <button id="finish" onClick="finishLocation()">Finish</button>
+                <div id="finishs">
+                    
+                    <div id="boxesSelect" class="selectMain">
+                        <p>boxes:</p>
+                        <div id="select" class="selectSub">
+                            
+                            <div class='mini'>
+                                <button>
+                                    <img src='/resources/imageTemplate.png'>
+                                    <p id='name'>${location.name}</p>
+                                    <p id='code'>${location.barcode}</p>
+                                </button>
+                            </div>
+                            <div class='mini'>
+                                <button>
+                                    <img src='/resources/imageTemplate.png'>
+                                    <p id='name'>${location.name}</p>
+                                    <p id='code'>${location.barcode}</p>
+                                </button>
+                            </div>
+                            <div class='mini'>
+                                <button>
+                                    <img src='/resources/imageTemplate.png'>
+                                    <p id='name'>${location.name}</p>
+                                    <p id='code'>${location.barcode}</p>
+                                </button>
+                            </div>
+                            <div class='mini'>
+                                <button>
+                                    <img src='/resources/imageTemplate.png'>
+                                    <p id='name'>${location.name}</p>
+                                    <p id='code'>${location.barcode}</p>
+                                </button>
+                            </div>
+                            <div class='mini'>
+                                <button>
+                                    <img src='/resources/imageTemplate.png'>
+                                    <p id='name'>${location.name}</p>
+                                    <p id='code'>${location.barcode}</p>
+                                </button>
+                            </div>
+                            <div class='mini'>
+                                <button>
+                                    <img src='/resources/imageTemplate.png'>
+                                    <p id='name'>${location.name}</p>
+                                    <p id='code'>${location.barcode}</p>
+                                </button>
+                            </div>
+                            <div class='mini'>
+                                <button>
+                                    <img src='/resources/imageTemplate.png'>
+                                    <p id='name'>${location.name}</p>
+                                    <p id='code'>${location.barcode}</p>
+                                </button>
+                            </div>
+
+                            
+                        </div>
+                    </div>
+                    <div id="finishDiv">
+                        <button id="finish" onClick="finishLocation()">Finish</button>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    <div id="cameraPopup" class="popup">
+        <div class="container">
+            <div class="xButtonDiv">
+                <button onClick="exitCameraPopup()" class="x">X</button>
+            </div>
+            <div id="box">
+                <div id="camera">
+                    <video id="video">Video stream not available.</video>
+                    <button id="start-button">Take photo</button>
+                </div>
+                <div id="confirm">
+                    <canvas id="canvas"> </canvas>
+                    <button id="retake" onClick="retake()">Retake photo</button>
+                    <button id="save" onClick="save()">save photo</button>
                 </div>
             </div>
         </div>

@@ -1,9 +1,8 @@
 :root {
-    --accent: #007bff;
+    --accent: #3a99fd;
     --accentHover: #0056b3;
     --popupOverlay:rgba(0, 0, 0, 0.5);
-  }
-
+}
 body{
     overflow-x: hidden;  
     background-color: var(--accent); 
@@ -11,418 +10,43 @@ body{
     width: 100vw;
     height: fit-content;
     margin: 0;
+    padding: 0;
+    overflow-y: hidden;
 }
 button{
     border: none;
-    border-radius: 4px;
-    background-color: var(--accent);
+    border-radius: 6px;
+        background-color: var(--accent);
     font-size: 1.5vw;
     color: white;
+    
 }
 button:hover{
     background-color: var(--accentHover);
 }
-p{
-    margin: 0;
-}
-#main{
-    position: absolute;
-    display: flex;
-    flex-wrap: wrap;
-    min-height: 100vh;
-    height: fit-content;
-    justify-content: space-evenly;
-    width: 100%;
-    margin-top: 0.3%;
-    
-    .box{
+p{margin:0}
+#input{
+    /* justify-content: flex-start;  */
+    #buttons{
         position: relative;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-        /* border: 1px solid #ced4da; */
-        /* background-image: linear-gradient(135deg, aqua, rgb(47, 168, 168)); */
-        background: white;
-        overflow-y:auto;
-        /* overflow-x:hidden; */
-        height:48vh;
-        width: 49%;
-        margin-bottom: 1%;
-        /* margin-inline: 0.5%; */
-        .title{
-            position:relative;
-            font-size: 2vw;
-            width: 100%;
-            height: fit-content;
-            margin-block:0;
-            margin-top: 5%;
-            /* margin-block: 5%; */
-            text-align: center;
-            
-        }
-    }
-    #input{
-        /* justify-content: flex-start;  */
-        #buttons{
-            position: relative;
-            width: 100%;
-            height: fit-content;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content:space-evenly;
-            margin-top: 5%;
-            button{
-                width: 30%;
-                height: 9vh;
-                /* margin-inline:0.5%; */
-                
-                margin-bottom: 0.5%;
-                /* background-color: var(--accent); */
-                
-            }
-        }
-    }
-    #locations{
+        width: 100%;
+        height: fit-content;
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-evenly;
-        padding-bottom: 2%;
-    }
-}
-#locationPopup{
-    background-color: var(--popupOverlay);
-    width: 100vw;
-    height:100%;
-    visibility: hidden;
-    position: absolute;
-    .container{
-        display: flex;
-        flex-wrap: wrap;
-        width: 80%;
-        min-height: 80vh;
-        height: fit-content;
-        background-color: white;
-        
-        margin-inline: 8%;
-        margin-top: 2%;
-        
-        padding: 2%;
-        .xButtonDiv{
-            display: flex;
-            flex-wrap: wrap;
-            width: 100%;
-            height: fit-content;
-            margin: 0;
-            justify-content: flex-end;
-            .x{
-                padding:0;
-                width: 2vw;
-                height: 2vw;
-                    
-            }
-        }
-        #locationBarcode{
-            position: absolute;
-            width: inherit;
-            visibility: hidden;
-            margin-top: 5%;
-            font-size: 1.5vw;
-            #scan{
-                position: relative;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                align-items: center;
-                height: fit-content;
-                p{
-                    width: 20%;
-                    height: fit-content;
-                }
-                input{
-                    font-size: 1.5vw;
-                    width:100%;
-                    height: 20%;
-                }
-                #submit{
-                    margin-top: 2%;
-                    width:20%;
-                    height:fit-content;
-                }
-            }
-            #select{
-                
-                height:10vw;
-                #locationsSelect{
-                    position: relative;
-                    display: flex;
-                    flex-wrap:nowrap;
-                    position: relative;
-                    height:fit-content;
-                    width: 100%;
-                    overflow-x: auto;
-                    margin-top:2%;
-                    
-                    .loc{
-                        position: relative;
-                        width:7vw;
-                        margin-inline: 2%;
-                        margin-bottom: 3%;
-                        button{  
-                            
-                            width:100%;
-                            padding: 0;
-                            border: 0;
-                            margin:0 ;
-                            height: fit-content;
-                            img{
-                                width: 100%;
-                            }
-                        }
-                        p{
-                            font-size: 1.3vw;
-                            width:100%;
-                            text-align: center;
-                            overflow-wrap: break-word;
-                            text-overflow: ellipsis;
-                            overflow: hidden;
-                            display: -webkit-box;
-                            -webkit-line-clamp: 2;
-                            -webkit-box-orient: vertical;
-                        }
-                        #code{
-                            font-size: 1vw;;
-                        }
-                    }
-                    .loc:hover{
-                        top:1vh;
-                    }
-                    #add{
-                        
-                        button{
-                            p{
-                                font-size: 5vw;
-                                padding-block: 10%;
-                            }
-                            
-                        }
-                    }
-                }
-            }
-            .or{
-                text-align: center;
-                margin-bottom: 5%;
-                margin-top: 5%;
-            }
-        } 
-        #locationInfo{
-            visibility: hidden;
-            display: flex;
-            position: absolute;
-            margin-top: 3%;
-            width: inherit;
-            height: inherit;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            align-content: center;
-            #locImg{
-                width:15%;
-                height:fit-content;
-            }
-            #barcodeImg{
-                margin-top: 0;
-                margin-left: 30%;
-                width: 25%;
-                height: fit-content;
-            } 
-            #printDiv{
-                margin-left: 1%;
-                width:25%;
-                height: fit-content;
-            #print{
-                height: fit-content;
-                width: 100%;
-                padding-top: 10%;
-                padding-bottom: 10%;
-            }
-            }
-            #finishDiv{
-                width: 100%;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: flex-end;
-                margin-top: 2%;
-                #finish{
-                    width:25%;
-                    height: fit-content;
-                    
-                    padding-top: 1%;
-                    padding-bottom: 1%;
-                }
-            }   
-            #inputDiv{
-                display: flex;
-                flex-wrap: wrap;
-    
-                margin-top: 5%;
-                width: 50%;
-                height: fit-content;
-                max-height: 35vh;
-                
-                /* p{
-                    width: 25%;
-                    margin-top: 1%; 
-                    margin-bottom: 3%;
-                } */
-                input{
-                    font-size: 1.5vw;
-                    width:100%;
-                    height: fit-content;
-                    margin-top: 1%;
-                    margin-bottom: 2%;
-                }
-                textarea{
-                    font-size: 1.5vw;
-                    width:99%;
-                    max-width: 99%;
-                    min-width: 99%;
-                    height: 15vh;
-                    overflow-y: scroll;
-                    
-                }
-            }
-            #historyDiv{
-                width: 48%;
-                margin-left: 2%;
-                height: fit-content;
-                max-height: 35vh;
-                overflow-y: auto;
-                display: flex;
-                flex-wrap: wrap;
-                #titleDiv{
-                    width: 100%;
-                    flex-wrap: wrap;
-                    justify-content: center;
-                    p{
-                        text-align: center;
-                    }
-                }
-                .entry{
-                    display: flex;
-                    flex-wrap: wrap;
-                    width: 100%;
-                    border-bottom: 1px solid grey;
-                    padding-bottom: 1%;
-                    height: fit-content;
-                    #nameDiv{
-                        width:15%;
-                    }
-                    #descDiv{
-                        
-                        width: 30%;
-                    }
-                    #boxDiv{
-                        width: 20%;
-                    }
-                    #timeDiv{
-                        
-                        width: 20%;
-                    }
-                    #versDiv{
-                        
-                        width: 10%;
-                    }
-                    .subEntry{
-                        font-size: 1vw;
-                        max-height: 4vw;
-                        overflow-y: auto;
-                        /* overflow-x:none;
-                        overflow-y: auto;
-                        display: -webkit-box;
-                        -webkit-line-clamp: 3;
-                        -webkit-box-orient: vertical;
-                        text-overflow: clip; */
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-.location{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content:space-evenly;
-    background-color: rgba(0, 0, 0, 0.3);
-    height: fit-content;
-    width: 47%;
-    padding: 1%;
-    margin-top: 0.5%;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    /* border: 1px solid #ced4da; */
-    border-radius: 10px;
-    .locArrowSVG{
-        /* margin-top: 1.5vh; */
-        width:15%;
-        
-        height: fit-content;
+        justify-content:space-evenly;
         margin-top: 5%;
-        /* margin-right: 3%; */
-        background-color: var(--accent);
-        border-radius: 50%;
-        img{
+        button{
+            width: 30%;
+            height: 9vh;
+            /* margin-inline:0.5%; */
             
-            width: 100%;
-            height: 50%;
-            scale:0.5;
-        }
-    }
-    .locArrowSVG:hover{
-        scale:1.2;
-    }
-    .images{
-        width: 30%;
-        padding: 0;
-        .locImg{
-            border-radius: 8px;
-            background-color: rgb(255, 127, 127);
-            width: 100%;
-            height: fit-content;
-            max-height: 20vh;
-            /* padding-bottom: 10%; */
-        }
-    }
-    .header{
-        width:45%;
-        .locName{
-            display: flex;
-            margin: 0;
-            height: fit-content;
-            font-size: 1.5vw;
-            width:100%;
-            text-align: start;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-        }
-        .locBarcode{
-            display:flex;
+            margin-bottom: 0.5%;
+            /* background-color: var(--accent); */
             
-            font-size: 0.9vw;
-            width: 100%;
-            text-align: start;
-        }   
-        .locDescription{
-            margin-top: 5%;
-            font-size: 1vw;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
         }
-        
     }
-
 }
+
+
+
+

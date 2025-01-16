@@ -1,10 +1,10 @@
-import os
 import sqlite3
-import sys
 from sys import *
 import datetime
 from flask import Flask, jsonify, request, send_from_directory, Response
 from flask_cors import CORS
+import urllib.request
+import os, shutil
 
 app = Flask(__name__)
 CORS(app)
@@ -67,9 +67,9 @@ def init():
                             name            TINYTEXT,
                             description        TEXT,
                             boxcode           VARCHAR,
+                            image        TEXT,
                             times          DATETIME,
                             vers             INTEGER
-                            
                             );""") 
     conn.commit()
     return "Action completed!", 200
@@ -91,9 +91,19 @@ def reset_database():
     cur.execute("""DROP table box""")
     cur.execute("""DROP table location""")
     conn.commit()
+    folder = 'images'
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
     return "Action completed!", 200
 
-@app.route('/print')
+@app.route('/print', methods=['GET'])
 def print_out():
     conn = getConn()
     cur =  conn.cursor()
@@ -160,23 +170,33 @@ def write_box(code, name, volume, size, locationCode, itemcodes):
     boxCodes = fetch[2]
     if(code not in boxCodes):
         boxCodes += "," + code
-    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?) ''', [fetch[0], fetch[1], fetch[2], boxCodes,  timestamp, fetch[5]+1])
+    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [fetch[0], fetch[1], fetch[2], boxCodes,  fetch[4], timestamp, fetch[6]+1])
     conn.commit()
     return "Action completed!", 200
 
-@app.route('/write_location/<code>/<name>/<description>/<boxCodes>', methods=['POST'])
-def write_location(code, name, description, boxCodes):
+@app.route('/write_location', methods=['POST'])
+def write_location():
+    data = request.get_json()
+    print(data) 
     conn = getConn()
     cur =  conn.cursor()
-    cur.execute(f"""SELECT MAX(vers) FROM location WHERE barcode='{code}';""")
+    cur.execute(f"""SELECT MAX(vers) FROM location WHERE barcode='{data['barcode']}';""")
     fetch =  cur.fetchone()
     vers = 0
     if(fetch[0] != None):
         vers = fetch[0]
     
+    print(data['image'])
+    change = False
+    if(data['imageChange'] == 'y'):
+        response = urllib.request.urlopen(data['image'])
+        change = True
+        with open(f'images/{data['barcode']}_vers{vers}.jpg', 'wb') as f:
+            f.write(response.file.read())
+
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?) ''', [code, name, description, boxCodes, timestamp, vers+1])
+    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['boxcode'], f'/images/{data['barcode']}_vers{vers}.jpg' if change else data['image'], timestamp, vers+1])
     conn.commit()
     return "Action completed!", 200
 
@@ -214,13 +234,15 @@ def pull_location(code) ->tuple:
                     "name": fetch[1],
                     "description": fetch[2],
                     "boxcode": fetch[3],
-                    "time": fetch[4],
-                    "vers": fetch[5]}
+                    "image": fetch[4],
+                    "time": fetch[5],
+                    "vers": fetch[6]}
     else:
         response = {"barcode": "",
                     "name": "",
                     "description": "",
                     "boxcode": "",
+                    "image": "",
                     "time": "",
                     "vers": ""}
     return jsonify(response), 200
@@ -238,8 +260,9 @@ def pull_all_locations():
                     "name": location[1],
                     "description": location[2],
                     "boxcode": location[3],
-                    "time": location[4],
-                    "vers": location[5]})
+                    "image": location[4],
+                    "time": location[5],
+                    "vers": location[6]})
     return jsonify(response),200
 
 @app.route('/pull_all_boxes')
@@ -291,8 +314,9 @@ def pull_location_history(code)->list[tuple]:
                     "name": item[1],
                     "description": item[2],
                     "boxcode": item[3],
-                    "time": item[4],
-                    "vers": item[5]})
+                    "image": item[4],
+                    "time": item[5],
+                    "vers": item[6]})
     return jsonify(response),200
 
 
