@@ -47,4 +47,5 @@ function updateLocations(){
 
 async function finishLocation(code) {
     finishLocationMain(code);
+    updateLocations();
 }

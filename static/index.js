@@ -1,4 +1,10 @@
 const flaskAd = 'http://127.0.0.1:5502/'
+const locationErrorPopup = document.getElementById("locationErrorPopup");
+const boxErrorPopup = document.getElementById("boxErrorPopup");
+let state = ["none"]
+function peek(){
+    return state[state.length()-1]
+}
 function init() {
     fetch(flaskAd+'init', {method: 'POST'}) 
 }
@@ -6,135 +12,6 @@ window.onload = init;
 window.onbeforeunload = function () {
     fetch(flaskAd+'quit')
 };
-
-
-// let barcodeUrl;
-function addLocation(){
-    window.scrollTo(top)
-    // console.log("trig");
-    document.getElementById("locationPopup").style.visibility = 'visible';
-    document.getElementById("locationBarcode").style.visibility = 'visible';
-    document.getElementById("barcodeInput").value = "";
-    document.getElementById("barcodeInput").focus();
-    // document.getElementById("barcodeInput").value = "";
-    let div = document.getElementById("locationsSelect")
-    div.innerHTML = `<div id='add' class='mini'>
-                        <button onClick='generateNewBarcode()'>
-                            <p id="plus">+</p>
-                            <p id="text">Add new location</p>
-                        </button>
-                    </div>`
-    fetch(flaskAd+'pull_all_locations').then(response => response.json())  // Use .text() to read plain text
-    .then(data => {
-      for(const location of data.locations){
-        // console.log(location)
-        div.innerHTML += 
-        `<div class='mini'>
-            <button onClick='processSubmissionBarcode(${location.barcode})'>
-                <img src='${location.image}'>
-                <p id='name'>${location.name}</p>
-                <p id='code'>${location.barcode}</p>
-            </button>
-        </div>`
-      }
-    })
-}
-
-function generateNewBarcode(){
-    processSubmissionBarcode(Math.floor(Math.random()*(Math.pow(10, 12)))); 
-}
-
-function submitBarcode(){
-    processSubmissionBarcode(document.getElementById('barcodeInput').value)
-}
-async function processSubmissionBarcode(code){
-    imageChange = false;
-    window.scrollTo(top)
-    document.getElementById("locationPopup").style.visibility = 'visible';
-    document.getElementById("locationBarcode").style.visibility = 'hidden';
-    document.getElementById("locationInfo").style.visibility = 'visible';
-    await fetch(flaskAd+`pull_location/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
-    .then(data => {
-        document.getElementById("nameInput").value = data.name;
-        document.getElementById("descriptionInput").value = data.description;
-        document.getElementById("finishDiv").innerHTML = ` <button id="finish" onClick="finishLocationMain(${code})">finish</button>`
-        document.getElementById("printDiv").innerHTML = `<button id="print"onClick="printBarcode(${code})">print barcode</button>`
-        document.getElementById("imgButtonDiv").innerHTML = `<button id="imgButton" onClick="camera(${code})">Add/Change Image</button>`
-        document.getElementById("locImg").src = data.image != ""?data.image:"/resources/imageTemplate.png";
-    })
-    
-    document.getElementById("barcodeImg").src = getBarcodeSrc(code);
-    div = document.getElementById("historyDiv");
-    div.innerHTML = '';
-    isHistory = false
-    await fetch(flaskAd+`pull_location_history/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
-    .then(data => {
-        for(const loc of data.locations){
-            div.innerHTML += `<div id="headerEntry" class="entry">
-                <p id='nameDiv' class='subEntry'>${loc.name}</p>
-                <p id='descDiv' class='subEntry'>${loc.description}</p>
-                <p id='boxDiv' class='subEntry'>${loc.boxcode}</p>
-                <p id='timeDiv' class='subEntry'>${loc.time}</p>
-                <p id='versDiv' class='subEntry'>${loc.vers}</p>
-            </div>`
-            isHistory = true;
-        }
-
-    });
-    if(isHistory){
-        div.innerHTML = `<div id="titleDiv"><p class='title'>History</p></div>
-        <div id="headerEntry" class="entry">
-            <b id='nameDiv' class='subEntry'>Name</b>
-            <b id='descDiv' class='subEntry'>Description</b>
-            <b id='boxDiv' class='subEntry'>Boxes</b>
-            <b id='timeDiv' class='subEntry'>Time</b>
-            <b id='versDiv' class='subEntry'>Version</b>
-        </div>` + div.innerHTML;
-    }
-}
-
-function getBarcodeSrc(code){
-    return `https://barcode.orcascan.com/?type=code128&data=${code}&format=jpeg&text=${code}`;
-}
-
-function printBarcode(code){
-    var imageUrl = getBarcodeSrc(code)
-    var printWindow = window.open('', '_blank', 'width=600,height=600');
-  
-    // Insert the image into the new window
-    printWindow.document.write('<html><head><title>Print Image</title></head><body>');
-    printWindow.document.write('<img src="' + imageUrl + '" style="width:100%;height:auto;"/>');
-    printWindow.document.write('</body></html>');
-    
-    // Wait for the image to load before triggering the print dialog
-    printWindow.document.close();  // This is important to finish the document setup
-    printWindow.onload = function() {
-    printWindow.print();  // Trigger the print dialog
-    printWindow.close();  // Optionally close the window after printing
-  };
-}
-
-let imageChange = false;
-async function finishLocationMain(code){
-    let im = document.getElementById("locImg").src
-    console.log(im);
-    const data = {
-        "barcode": code,
-        "name": document.getElementById("nameInput").value,
-        "description": document.getElementById("descriptionInput").value,
-        "boxcode": "none",
-        "image": document.getElementById("locImg").src,
-        "imageChange": imageChange?'y':'n'
-    };
-    fetch(flaskAd+`write_location`, {method: 'POST', headers: {'Content-Type': 'application/json'},body: JSON.stringify(data)})
-    .then(data => {
-      console.log(data);
-    })
-    document.getElementById("locationInfo").style.visibility = 'hidden'
-    document.getElementById("locationPopup").style.visibility = 'hidden'
-}
-
-
 
 
 function resetDB(){
@@ -148,10 +25,229 @@ function printDB(){
       console.log(data);
     })
 }
+
+
+function addLocation(){
+    state.push("loc")
+    window.scrollTo(top)
+    locationErrorPopup.style.visibility = 'hidden';
+    // console.log("trig");
+    document.getElementById("locationPopup").style.visibility = 'visible';
+    document.getElementById("locationBarcode").style.visibility = 'visible';
+    document.getElementById("barcodeLocationInput").value = "";
+    document.getElementById("barcodeLocationInput").focus();
+    let div = document.getElementById("locationsSelect")
+    div.innerHTML = `<div id='add' class='mini'>
+                        <button onClick='generateNewLocationBarcode()'>
+                            <p id="plus">+</p>
+                            <p id="text">Add new location</p>
+                        </button>
+                    </div>`
+    fetch(flaskAd+'pull_all_locations').then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+      for(const location of data.locations){
+        // console.log(location)
+        div.innerHTML += 
+        `<div class='mini'>
+            <button onClick='processLocationSubmissionBarcode(${location.barcode})'>
+                <img src='${location.image}'>
+                <p id='name'>${location.name}</p>
+                <p id='code'>${location.barcode}</p>
+            </button>
+        </div>`
+      }
+    })
+}
+
+function generateNewLocationBarcode(){
+    processLocationSubmissionBarcode(Math.floor(Math.random()*(Math.pow(10, 12)))); 
+}
+
+function submitLocationBarcode(){
+    let input = document.getElementById('barcodeLocationInput').value
+    if(input.match(/^[0-9]+$/) == null){
+        locationErrorPopup.style.visibility = locationErrorPopup.style.visibility == 'visible'?'hidden':  'visible';
+    }else{
+        locationErrorPopup.style.visibility = 'hidden';
+        processLocationSubmissionBarcode(input)
+    }
+}
+
+async function processLocationSubmissionBarcode(code){
+    imageChange = false;
+    window.scrollTo(top)
+    document.getElementById("locationPopup").style.visibility = 'visible';
+    document.getElementById("locationBarcode").style.visibility = 'hidden';
+    document.getElementById("locationInfo").style.visibility = 'visible';
+    document.getElementById("includeLocationName").checked = false;
+    await fetch(flaskAd+`pull_location/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+        document.getElementById("locationNameInput").value = data.name;
+        document.getElementById("descriptionInput").value = data.description;
+        document.getElementById("finishDiv").innerHTML = `<button id="history" onClick="locationHistoryPopup(${code})">View History</button> <button id="finish" onClick="finishLocationMain(${code})">finish</button>`
+        document.getElementById("printDiv").innerHTML = `<button id="print"onClick="printLocationBarcode(${code})">print barcode</button>
+                        <input type="checkbox" id="includeLocationName">
+                        <label id="includeNameLabel">Include Name</label><br>`
+        document.getElementById("imgButtonDiv").innerHTML = `<button id="imgButton" onClick="camera(${code})">Add/Change Image</button>`
+        document.getElementById("locImg").src = data.image != ""?data.image:"/resources/imageTemplate.png";
+    })
+    
+    document.getElementById("barcodeImg").src = getBarcodeSrc(code)+`L${code}`;
+    
+}
+
+async function locationHistoryPopup(code){
+    document.getElementById("locationHistoryPopup").style.visibility = 'visible';
+    div = document.getElementById("historyDiv");
+    div.innerHTML = `<div id="titleDiv"><p class='title'>History</p></div>
+        <div id="headerEntry" class="entry">
+            <b id='imageDiv' class='subEntry'>Image</b>
+            <b id='nameDiv' class='subEntry'>Name</b>
+            <b id='descDiv' class='subEntry'>Description</b>
+            <b id='boxDiv' class='subEntry'>Boxes</b>
+            <b id='timeDiv' class='subEntry'>Time</b>
+            <b id='versDiv' class='subEntry'>Version</b>
+        </div>`
+    await fetch(flaskAd+`pull_location_history/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+        for(const loc of data.locations){
+            div.innerHTML += `<div id="headerEntry" class="entry">
+                <img id='imageDiv' class='subEntry' src='${loc.image}'>
+                <p id='nameDiv' class='subEntry'>${loc.name}</p>
+                <p id='descDiv' class='subEntry'>${loc.description}</p>
+                <p id='boxDiv' class='subEntry'>${loc.boxcode}</p>
+                <p id='timeDiv' class='subEntry'>${loc.time}</p>
+                <p id='versDiv' class='subEntry'>${loc.vers}</p>
+            </div>`
+        }
+
+    });
+}
+
+let imageChange = false;
+async function finishLocationMain(code){
+    let im = document.getElementById("locImg").src
+    console.log(im);
+    const data = {
+        "barcode": code,
+        "name": document.getElementById("locationNameInput").value,
+        "description": document.getElementById("descriptionInput").value,
+        "boxcode": "",
+        "image": document.getElementById("locImg").src,
+        "imageChange": imageChange?'y':'n'
+    };
+    fetch(flaskAd+`write_location`, {method: 'POST', headers: {'Content-Type': 'application/json'},body: JSON.stringify(data)})
+    .then(data => {
+      console.log(data);
+    })
+    exitLocationPopup();
+    state.pop();
+}
+
+
+
+async function addBox(){
+    state.push("box")
+    window.scrollTo(top)
+    boxErrorPopup.style.visibility = 'hidden';
+    // console.log("trig");
+    document.getElementById("boxPopup").style.visibility = 'visible';
+    document.getElementById("boxBarcode").style.visibility = 'visible';
+    document.getElementById("barcodeBoxInput").value = "";
+    document.getElementById("barcodeBoxInput").focus();
+    let div = document.getElementById("boxesSelect");
+    div.innerHTML = `<div id='add' class='mini'>
+                        <button onClick='generateNewBoxBarcode()'>
+                            <p id="plus">+</p>
+                            <p id="text">Add new box</p>
+                        </button>
+                    </div>`
+    
+    await fetch(flaskAd+'pull_all_boxes').then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+      for(const box of data.boxes){
+        // console.log(location)
+        div.innerHTML += 
+        `<div class='mini'>
+            <button onClick='processBoxSubmissionBarcode(${box.barcode})'>
+                <img src='${box.image}'>
+                <p id='name'>${box.name}</p>
+                <p id='code'>${box.barcode}</p>
+            </button>
+        </div>`
+      }
+    })
+    console.log(div.innerHTML)
+}
+
+function submitBoxBarcode(){
+    let input = document.getElementById('barcodeBoxInput').value
+    if(input.match(/^[0-9]+$/) == null){
+        boxErrorPopup.style.visibility = boxErrorPopup.style.visibility == 'visible'?'hidden':  'visible';
+    }else{
+        boxErrorPopup.style.visibility = 'hidden';
+        processBoxSubmissionBarcode(input)
+    }
+}
+
+async function processBoxSubmissionBarcode(code){
+    imageChange = false;
+    window.scrollTo(top)
+    document.getElementById("boxPopup").style.visibility = 'visible';
+    document.getElementById("boxBarcode").style.visibility = 'hidden';
+    document.getElementById("boxInfo").style.visibility = 'visible';
+    document.getElementById("includeBoxName").checked = false;
+    await fetch(flaskAd+`pull_box/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+        document.getElementById("boxNameInput").value = data.name;
+        document.getElementById("descriptionInput").value = data.description;
+        document.getElementById("finishDiv").innerHTML = `<button id="history" onClick="boxHistoryPopup(${code})">View History</button> <button id="finish" onClick="finishLocationMain(${code})">finish</button>`
+        document.getElementById("printDiv").innerHTML = `<button id="print"onClick="printBoxBarcode(${code})">print barcode</button>
+                        <input type="checkbox" id="includeBoxName">
+                        <label id="includeNameLabel">Include Name and Location</label><br>`
+        document.getElementById("imgButtonDiv").innerHTML = `<button id="imgButton" onClick="camera(${code})">Add/Change Image</button>`
+        document.getElementById("boxImg").src = data.image != ""?data.image:"/resources/imageTemplate.png";
+    })
+    
+    document.getElementById("barcodeImg").src = getBarcodeSrc(code)+`L${code}`;
+    
+}
+
+
+
+function getBarcodeSrc(code){
+    return `https://barcode.orcascan.com/?type=code128&data=${code}&format=jpeg&text=`;    
+}
+
+function printLocationBarcode(code){
+    var imageUrl = getBarcodeSrc(code)+ `L${code}` + (document.getElementById("includeLocationName").checked?`_${document.getElementById("locationNameInput").value}`:``);
+    console.log(imageUrl)
+    var printWindow = window.open('', '_blank', 'width=600,height=600');
+
+    printWindow.document.write('<html><head><title>Print Image</title></head><body>');
+    printWindow.document.write('<img src="' + imageUrl + '" style="width:100%;height:auto;"/>');
+    printWindow.document.write('</body></html>');
+    
+    printWindow.document.close();  
+    printWindow.onload = function() {
+    printWindow.print();
+    printWindow.close(); 
+  };
+}
+
+
+
 function exitLocationPopup(){
     document.getElementById("locationBarcode").style.visibility = 'hidden'
     document.getElementById("locationInfo").style.visibility = 'hidden'
     document.getElementById("locationPopup").style.visibility = 'hidden'
+    locationErrorPopup.style.visibility = 'hidden'
+}
+function exitBoxPopup(){
+    document.getElementById("boxBarcode").style.visibility = 'hidden'
+    document.getElementById("boxInfo").style.visibility = 'hidden'
+    document.getElementById("boxPopup").style.visibility = 'hidden'
+    boxErrorPopup.style.visibility = 'hidden'
 }
 function exitCameraPopup(){
     document.getElementById("cameraPopup").style.visibility = 'hidden'
@@ -164,6 +260,12 @@ function exitCameraPopup(){
     });
     video.srcObject = null;
 }
+function exitLocationHistoryPopup(){
+    document.getElementById("locationHistoryPopup").style.visibility = 'hidden';
+}
+
+
+
 
 function camera(code){
     document.getElementById("cameraPopup").style.visibility = 'visible';
@@ -171,25 +273,12 @@ function camera(code){
     startup();
 }
 
-// The width and height of the captured photo. We will set the
-// width to the value defined here, but the height will be
-// calculated based on the aspect ratio of the input stream.
-
-const width = 320; // We will scale the photo width to this
-let height = 0; // This will be computed based on the input stream
-// |streaming| indicates whether or not we're currently streaming
-// video from the camera. Obviously, we start at false.
-
+const width = 320;
+let height = 0;
 let streaming = false;
-
-// The various HTML elements we need to configure or control. These
-// will be set by the startup() function.
-
 let video = null;
 let canvas = null;
 let startButton = null;
-
-
 
 function startup() {
     video = document.getElementById("video");
@@ -239,15 +328,6 @@ function startup() {
     );
 }
 
-// Fill the photo with an indication that none has been
-// captured.
-
-// Capture a photo by fetching the current contents of the video
-// and drawing it into a canvas, then converting that to a PNG
-// format data URL. By drawing it on an offscreen canvas and then
-// drawing that to the screen, we can change its size and/or apply
-// other changes before drawing it.
-
 function takePicture() {
     const context = canvas.getContext("2d");
     canvas.width = width;
@@ -257,8 +337,6 @@ function takePicture() {
     const data = canvas.toDataURL("image/png");
     document.getElementById("camera").style.visibility = 'hidden';
     document.getElementById("confirm").style.visibility = 'visible';
-        // photo.setAttribute("src", data);
-        // downloadImage(data, 'image.png');
 }
 
 function retake(){
@@ -268,11 +346,7 @@ function retake(){
 
 function save(){
     const data = canvas.toDataURL("image/png");
-    document.getElementById("locImg").src = data;
+    document.getElementById(state.peek()+"Img").src = data;
     imageChange = true;
     exitCameraPopup();
 }
-// Set up our event listener to run the startup process
-// once loading is complete.
-// window.addEventListener("load", startup, false);
-

@@ -35,7 +35,7 @@ def init():
                             quantity        INTEGER,
                             boxcode        VARCHAR,
                             image           VARCHAR,
-                            times      DATETIME,
+                            time      DATETIME,
                             vers         INTEGER
                             
                             );""") 
@@ -52,7 +52,8 @@ def init():
                             size        TINYTEXT CHECK(size IN ('Small','Medium','Large','XLarge','Bag','Bucket','None','Other') ),
                             locationcode        VARCHAR,
                             itemcode           VARCHAR,
-                            times          DATETIME,
+                            image          TEXT,
+                            time          DATETIME,
                             vers             INTEGER
                             
                             );""") 
@@ -68,7 +69,7 @@ def init():
                             description        TEXT,
                             boxcode           VARCHAR,
                             image        TEXT,
-                            times          DATETIME,
+                            time          DATETIME,
                             vers             INTEGER
                             );""") 
     conn.commit()
@@ -122,113 +123,244 @@ def print_out():
     # return "items:\n" + str(fetch1) + "\nboxes:\n" + str(fetch2) + "\nlocations:\n" + str(fetch3)
     return Response("items:\n" + str(fetch1) + "\nboxes:\n" + str(fetch2) + "\nlocations:\n" + str(fetch3), content_type='text/plain')
 
-@app.route('/write_item/<code>/<name>/<description>/<quantity>/<boxCodes>/<imageAddress>/<newBoxVol>', methods=['POST'])
-def write_item(code, name, description, quantity, boxCodes, imageAddress, newBoxVol):
-    conn = getConn()
-    cur =  conn.cursor()
-    cur.execute(f"""SELECT MAX(vers) FROM item WHERE barcode='{code}';""")
-    fetch =  cur.fetchone()
-    vers = 0
-    if(fetch[0] != None):
-        vers = fetch[0]
-    
-    timestamp = datetime.datetime.now()
-    
-    cur.execute('''INSERT INTO item VALUES (?, ?, ?, ?, ?, ?, ?, ?) ''', [code, name, description, quantity, boxCodes, imageAddress, timestamp, vers+1])
-    
-    codes = boxCodes.split(",")
-    for cod in codes:
-        cur.execute(f"""SELECT * FROM box WHERE barcode='{cod}' AND vers = (SELECT MAX(vers) FROM box WHERE barcode='{cod}');""")
-        fetch =  cur.fetchall()
-        
-        for box in fetch:
-            itemCodes = box[4]
-            if(code not in itemCodes):
-                itemCodes += "," + code
-            cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?) ''', [box[0], box[1], newBoxVol, box[3], box[4], itemCodes, timestamp, box[7]+1])
-    conn.commit()
-    return "Action completed!", 200
-
-@app.route('/write_box/<code>/<name>/<size>/<locationCode>/<itemcodes>', methods=['POST'])
-def write_box(code, name, volume, size, locationCode, itemcodes):
-    conn = getConn()
-    cur =  conn.cursor()
-    cur.execute(f"""SELECT MAX(vers) FROM box WHERE barcode='{code}';""")
-    fetch =  cur.fetchone()
-    vers = 0
-    if(fetch[0] != None):
-        vers = fetch[0]
-    
-    timestamp = datetime.datetime.now()
-    
-    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?) ''', [code, name, volume, size, locationCode, itemcodes, timestamp, vers+1])
-    
-    
-    cur.execute(f"""SELECT * FROM location WHERE barcode='{locationCode}' AND vers = (SELECT MAX(vers) FROM location WHERE barcode='{locationCode}');""")
-    fetch =  cur.fetchall()
-        
-    boxCodes = fetch[2]
-    if(code not in boxCodes):
-        boxCodes += "," + code
-    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [fetch[0], fetch[1], fetch[2], boxCodes,  fetch[4], timestamp, fetch[6]+1])
-    conn.commit()
-    return "Action completed!", 200
-
-@app.route('/write_location', methods=['POST'])
-def write_location():
+#old
+@app.route('/write_item', methods=['POST'])
+def write_item(code):
     data = request.get_json()
-    print(data) 
     conn = getConn()
     cur =  conn.cursor()
-    cur.execute(f"""SELECT MAX(vers) FROM location WHERE barcode='{data['barcode']}';""")
-    fetch =  cur.fetchone()
+    # cur.execute(f"""SELECT MAX(vers) FROM item WHERE barcode='{code}';""")
+    # fetch =  cur.fetchone()
+    oldItem = pull_item_internal(data['barcode'])
     vers = 0
-    if(fetch[0] != None):
-        vers = fetch[0]
+    if(oldItem['vers'] != ""):
+        vers = data['vers']
+    if(data['boxcode'] != oldItem['boxcode']):
+        add_box_itemcode(oldItem['boxcode'], data['barcode'])
     
-    print(data['image'])
     change = False
     if(data['imageChange'] == 'y'):
         response = urllib.request.urlopen(data['image'])
         change = True
-        with open(f'images/{data['barcode']}_vers{vers}.jpg', 'wb') as f:
+        with open(f'images/I{data['barcode']}_vers{vers}.jpg', 'wb') as f:
             f.write(response.file.read())
 
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['boxcode'], f'/images/{data['barcode']}_vers{vers}.jpg' if change else data['image'], timestamp, vers+1])
+    cur.execute('''INSERT INTO item VALUES (?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['quantity'], data['boxcode'],  f'/images/I{data['barcode']}_vers{vers}.jpg' if change else data['image'], timestamp, vers+1])
+    
+    # codes = boxCodes.split(",")
+    # for cod in codes:
+    #     cur.execute(f"""SELECT * FROM box WHERE barcode='{cod}' AND vers = (SELECT MAX(vers) FROM box WHERE barcode='{cod}');""")
+    #     fetch =  cur.fetchall()
+        
+    #     for box in fetch:
+    #         itemCodes = box[4]
+    #         if(code not in itemCodes):
+    #             itemCodes += "," + code
+    #         cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?) ''', [box[0], box[1], newBoxVol, box[3], box[4], itemCodes, timestamp, box[7]+1])
     conn.commit()
     return "Action completed!", 200
 
+@app.route('/write_box', methods=['POST'])
+def write_box():
+    data = request.get_json()
+    conn = getConn()
+    cur =  conn.cursor()
+    oldBox = pull_box_internal(data['barcode'])
+    vers = 0
+    if(oldBox['vers'] != ""):
+        vers = data['vers']
+    if(data['locationcode'] != oldBox['locationcode']):
+       add_location_boxcode(data['locationcode'], data['barcode'])
+       if(oldBox['locationcode'] != ''):
+           remove_location_boxcode(oldBox['locationcode'], data['barcode'])
+    
+    change = False
+    if(data['imageChange'] == 'y'):
+        response = urllib.request.urlopen(data['image'])
+        change = True
+        with open(f'images/B{data['barcode']}_vers{vers}.jpg', 'wb') as f:
+            f.write(response.file.read())
+
+    timestamp = datetime.datetime.now()
+    
+    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['volume'], data['size'], data['locationcode'], data['itemcode'], f'/images/B{data['barcode']}_vers{vers}.jpg' if change else data['image'], timestamp, vers+1])
+    
+    
+    # cur.execute(f"""SELECT * FROM location WHERE barcode='{data['locationcode']}' AND vers = (SELECT MAX(vers) FROM location WHERE barcode='{data['locationcode']}');""")
+    # fetch = pull_location_internal(data['locationcode'])
+        
+    # boxCodes = fetch[3]
+    # print(boxCodes)
+    # if(data['barcode'] not in boxCodes):
+    #     boxCodes += "," + data['barcode']
+    # cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [fetch[0], fetch[1], fetch[2], boxCodes,  fetch[4], timestamp, fetch[6]+1])
+    conn.commit()
+    return "Action completed!", 200
+
+def add_box_itemcode(code, itemcode):
+    fetch =  pull_box_internal(code)
+    vers = 0
+    if(fetch['vers'] != ""):
+        vers = fetch['vers']
+    timestamp = datetime.datetime.now()
+    conn = getConn()
+    cur = conn.cursor()
+    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ''', [code, fetch['name'], fetch['volume'], fetch['size'], fetch['locationcode'], fetch['itemcode']+f',{itemcode}', fetch['image'], timestamp, vers+1])
+    conn.commit()
+    return 
+
+def remove_box_itemcode(code, itemcode):
+    fetch =  pull_box_internal(code)
+    vers = 0
+    if(fetch['vers'] != ""):
+        vers = fetch['vers']
+    timestamp = datetime.datetime.now()
+    conn = getConn()
+    cur = conn.cursor()
+    itemcodes = fetch['itemcode']+' '
+    itemcodes = itemcodes[0:itemcodes.index(itemcode)] + itemcodes[itemcodes.index(itemcode)+len(itemcode)+2:]
+    if(itemcode[len(itemcode)-1]==' '):
+        itemcode = itemcode[:len(itemcode)-1]
+    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ''', [code, fetch['name'], fetch['volume'], fetch['size'], fetch['locationcode'], itemcodes, fetch['image'], timestamp, vers+1])
+    conn.commit()
+    return 
+
+@app.route('/write_location', methods=['POST'])
+def write_location():
+    data = request.get_json()
+    # print(data) 
+    conn = getConn()
+    cur =  conn.cursor()
+    # cur.execute(f"""SELECT MAX(vers) FROM location WHERE barcode='{data['barcode']}';""")
+    fetch = pull_location_internal(data['barcode'])
+    vers = 0
+    if(fetch['vers'] != ""):
+        vers = fetch['vers']
+    
+    # print(data['image'])
+    change = False
+    if(data['imageChange'] == 'y'):
+        response = urllib.request.urlopen(data['image'])
+        change = True
+        with open(f'images/L{data['barcode']}_vers{vers}.jpg', 'wb') as f:
+            f.write(response.file.read())
+
+    timestamp = datetime.datetime.now()
+    
+    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['boxcode'], f'/images/L{data['barcode']}_vers{vers}.jpg' if change else data['image'], timestamp, vers+1])
+    conn.commit()
+    return "Action completed!", 200
+
+def add_location_boxcode(code, boxcode):
+    fetch =  pull_location_internal(code)
+    vers = 0
+    if(fetch['vers'] != ""):
+        vers = fetch['vers']
+    timestamp = datetime.datetime.now()
+    conn = getConn()
+    cur = conn.cursor()
+    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [code, fetch['name'], fetch['description'], fetch['boxcode']+f',{boxcode}', fetch['image'], timestamp, vers+1])
+    conn.commit()
+    return 
+
+def remove_location_boxcode(code, boxcode):
+    fetch =  pull_location_internal(code)
+    vers = 0
+    if(fetch['vers'] != ""):
+        vers = fetch['vers']
+    timestamp = datetime.datetime.now()
+    conn = getConn()
+    cur = conn.cursor()
+    boxcodes = fetch['boxcode']+' '
+    boxcodes = boxcodes[0:boxcodes.index(boxcode)] + boxcodes[boxcodes.index(boxcode)+len(boxcode)+2:]
+    if(boxcode[len(boxcode)-1]==' '):
+        boxcode = boxcode[:len(boxcode)-1]
+    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [code, fetch['name'], fetch['description'], boxcodes, fetch['image'], timestamp, vers+1])
+    conn.commit()
+    return 
+
+
+
+def pull_item_internal(code, vers=None):
+    conn = getConn()
+    cur =  conn.cursor()
+    if(vers == None):
+        cur.execute(f"""SELECT * FROM item WHERE barcode='{code}' AND vers = (SELECT MAX(vers) FROM item WHERE barcode='{code}');""")
+    else:
+        cur.execute(f"""SELECT * FROM item WHERE barcode='{code}' AND vers = '{vers}';""")
+    fetch = cur.fetchone()
+    if(fetch != None):
+        response = {"barcode": fetch[0],
+                    "name": fetch[1],
+                    "description": fetch[2],
+                    "quantity": fetch[3],
+                    "boxcode": fetch[4],
+                    "image": fetch[5],
+                    "time": fetch[6],
+                    "vers": fetch[7]}
+    else:
+        response = {"barcode": "",
+                    "name": "",
+                    "description": "",
+                    "quantity": "",
+                    "boxcode": "",
+                    "image": "",
+                    "time": "",
+                    "vers": ""}
+    return response
+
 @app.route('/pull_item/<code>')
 def pull_item(code)->tuple:
+    return jsonify(pull_item_internal(code)), 200
+
+
+def pull_box_internal(code, vers=None):
     conn = getConn()
     cur =  conn.cursor()
-    cur.execute(f"""SELECT * FROM item WHERE barcode='{code}' AND vers = (SELECT MAX(vers) FROM item WHERE barcode='{code}');""")
-    fetch =  cur.fetchone()
+    if(vers == None):
+        cur.execute(f"""SELECT * FROM box WHERE barcode='{code}' AND vers = (SELECT MAX(vers) FROM box WHERE barcode='{code}');""")
+        
+    else:
+        cur.execute(f"""SELECT * FROM box WHERE barcode='{code}' AND vers = '{vers}';""")
+    fetch = cur.fetchone()
     if(fetch != None):
-        return fetch
-    return ("", "", "", "", "", "", "", "")
+        response = {"barcode": fetch[0],
+                    "name": fetch[1],
+                    "volume": fetch[2],
+                    "size": fetch[3],
+                    "locationcode": fetch[4],
+                    "itemcode": fetch[5],
+                    "image": fetch[6],
+                    "time": fetch[7],
+                    "vers": fetch[8]}
+    else:
+        response = {"barcode": "",
+                    "name": "",
+                    "volume": "",
+                    "size": "",
+                    "locationcode": "",
+                    "itemcode": "",
+                    "image": "",
+                    "time": "",
+                    "vers": ""}
+    return response
 
 @app.route('/pull_box/<code>')
-def pull_box(code)->tuple:
+def pull_box(code):
+    return jsonify(pull_box_internal(code)), 200
+
+
+def pull_location_internal(code, vers=None):
+    
     conn = getConn()
     cur =  conn.cursor()
-    cur.execute(f"""SELECT * FROM box WHERE barcode='{code}' AND vers = (SELECT MAX(vers) FROM box WHERE barcode='{code}');""")
-    fetch =  cur.fetchone()
-    if(fetch != None):
-        return fetch
-    return ("", "", "", "", "", "", "", "")
-
-def pull_location_internal(code):
-    conn = getConn()
-    cur =  conn.cursor()
-    cur.execute(f"""SELECT * FROM location WHERE barcode='{code}' AND vers = (SELECT MAX(vers) FROM location WHERE barcode='{code}');""")
-    return cur.fetchone()
-
-@app.route('/pull_location/<code>')
-def pull_location(code) ->tuple:
-    fetch = pull_location_internal(code)
+    if(vers == None):
+        cur.execute(f"""SELECT * FROM location WHERE barcode='{code}' AND vers = (SELECT MAX(vers) FROM location WHERE barcode='{code}');""")
+    else:
+        cur.execute(f""" SELECT * FROM location WHERE barcode='{code}' AND vers='{vers}'; """)
+    fetch = cur.fetchone()
     if(fetch != None):
         response = {"barcode": fetch[0],
                     "name": fetch[1],
@@ -245,7 +377,12 @@ def pull_location(code) ->tuple:
                     "image": "",
                     "time": "",
                     "vers": ""}
-    return jsonify(response), 200
+    return response
+
+@app.route('/pull_location/<code>')
+def pull_location(code):
+    return jsonify(pull_location_internal(code)), 200
+
 
 @app.route('/pull_all_locations')
 def pull_all_locations():
@@ -255,15 +392,8 @@ def pull_all_locations():
     fetch =  cur.fetchall()
     response = {"locations":[]}
     for code in fetch:
-        location = pull_location_internal(code[0])
-        response["locations"].append({"barcode": location[0],
-                    "name": location[1],
-                    "description": location[2],
-                    "boxcode": location[3],
-                    "image": location[4],
-                    "time": location[5],
-                    "vers": location[6]})
-    return jsonify(response),200
+        response["locations"].append(pull_location_internal(code[0]))
+    return jsonify(response), 200
 
 @app.route('/pull_all_boxes')
 def pull_all_boxes():
@@ -271,53 +401,55 @@ def pull_all_boxes():
     cur =  conn.cursor()
     cur.execute(f"""SELECT DISTINCT barcode FROM box""")
     fetch = cur.fetchall()
-    output = []
+    response = {"boxes":[]}
     for code in fetch:
-        output.append(pull_item(code[0]))
-    return output
+        response["boxes"].append(pull_box_internal(code[0]))
+    return jsonify(response), 200
 
 @app.route('/pull_all_items')
-def pull_all_items(self):
+def pull_all_items():
     conn = getConn()
     cur =  conn.cursor()
     cur.execute(f"""SELECT DISTINCT barcode FROM item""")
     fetch = cur.fetchall()
-    output = []
+    response = {"items":[]}
     for code in fetch:
-        output.append(pull_item(code[0]))
-    return output
+        response["items"].append(pull_item_internal(code[0]))
+    return jsonify(response), 200
+
 
 @app.route('/pull_item_history/<code>')
-def pull_item_history(code)->list[tuple]:
+def pull_item_history(code):
     conn = getConn()
     cur =  conn.cursor()
-    cur.execute(f""" SELECT * FROM item WHERE barcode='{code}' ORDER BY vers DESC;""")
-    return cur.fetchall()
+    cur.execute(f""" SELECT vers FROM item WHERE barcode='{code}' ORDER BY vers DESC;""")
+    fetch =  cur.fetchall()
+    response = {"items":[]}
+    for item in fetch:
+        response["items"].append(pull_item_internal(code, item[0]))
+    return jsonify(response), 200
 
 @app.route('/pull_box_history/<code>')
-def pull_box_history(code)->list[tuple]:
+def pull_box_history(code):
     conn = getConn()
     cur =  conn.cursor()
-    cur.execute(f""" SELECT * FROM box WHERE barcode='{code}' ORDER BY vers DESC;""")
-    return  cur.fetchall()
+    cur.execute(f""" SELECT vers FROM box WHERE barcode='{code}' ORDER BY vers DESC;""")
+    fetch = cur.fetchall()
+    response = {"boxes":[]}
+    for item in fetch:
+        response["boxes"].append(pull_box_internal(code, item[0]))
+    return jsonify(response), 200
 
 @app.route('/pull_location_history/<code>')
-def pull_location_history(code)->list[tuple]:
+def pull_location_history(code):
     conn = getConn()
     cur =  conn.cursor()
-    cur.execute(f""" SELECT * FROM location WHERE barcode='{code}' ORDER BY vers DESC;""")
+    cur.execute(f""" SELECT vers FROM location WHERE barcode='{code}' ORDER BY vers DESC;""")
     fetch = cur.fetchall()
     response = {"locations":[]}
     for item in fetch:
-        print(item)
-        response["locations"].append({"barcode": item[0],
-                    "name": item[1],
-                    "description": item[2],
-                    "boxcode": item[3],
-                    "image": item[4],
-                    "time": item[5],
-                    "vers": item[6]})
-    return jsonify(response),200
+        response["locations"].append(pull_location_internal(code, item[0]))
+    return jsonify(response), 200
 
 
 if __name__ == "__main__":
