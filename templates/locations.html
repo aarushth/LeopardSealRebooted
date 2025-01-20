@@ -33,9 +33,9 @@
             </div>
             <div id="locationBarcode">
                 <div id="scan">
-                    <input placeholder="Scan Barcode" id="barcodeInput">
+                    <input placeholder="Scan Barcode" id="barcodeLocationInput">
                     <p></p>
-                    <button id="submit" onClick="submitBarcode()">submit
+                    <button id="submit" onClick="submitLocationBarcode()">submit
                         <span class="errorPopup" id="locationErrorPopup">Invalid Barcode</span>
                     </button>
                 </div>
@@ -55,18 +55,18 @@
                     <img id="barcodeImg"></img>
                     <div id="printDiv">
                         <button id="print" onClick="printBarcode()">Print Barcode</button>
-                        <input type="checkbox" id="includeName">
+                        <input type="checkbox" id="includeLocationName">
                         <label id="includeNameLabel">Include Name</label><br>
                     </div>
                 </div>
                 <div id="inputDiv">
-                    <input placeholder="Name" id="nameInput">
+                    <input placeholder="Name" id="locationNameInput">
                     
                     <textarea placeholder="Description" id="descriptionInput"></textarea>
                 </div>
                 <div id="finishs">
                     
-                    <div id="boxesSelect" class="selectMain">
+                    <div id="boxesListSelect" class="selectMain">
                         <p>boxes:</p>
                         <div id="select" class="selectSub">
                             <!-- <div class='mini'>

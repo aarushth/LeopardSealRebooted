@@ -1,5 +1,6 @@
 function init() {
     fetch(flaskAd+'init', {method: 'POST'});
+    
     updateLocations();
 }
 window.onload = init;
@@ -8,8 +9,9 @@ window.onbeforeunload = function () {
 };
 
 
-function updateLocations(){
+async function updateLocations(){
     let div = document.getElementById("locations")
+    
     div.innerHTML =
     `<div id='AddButtonDiv'>
         <button onClick='addLocation()'>
@@ -21,10 +23,10 @@ function updateLocations(){
             </div>
         </button>
     </div>`;
-    fetch(flaskAd+'pull_all_locations').then(response => response.json())  // Use .text() to read plain text
+    await fetch(flaskAd+'pull_all_locations').then(response => response.json())  // Use .text() to read plain text
     .then(data => {
       for(const location of data.locations){
-        // console.log(location)
+        // console.log(location.image)
         div.innerHTML += 
         `<div class='location' id='${location.barcode}'>
             <div class='images'>
@@ -37,15 +39,10 @@ function updateLocations(){
             </div>
             <div class='locArrowDiv'>
                 <div class='locArrowSVG'>
-                    <img onClick='processSubmissionBarcode(${location.barcode})' src='/resources/edit-button-svgrepo-com.png'>
+                    <img onClick='processLocationSubmissionBarcode(${location.barcode})' src='/resources/edit-button-svgrepo-com.png'>
                 </div>
             </div>
         </div>`
       }
     })
-}
-
-async function finishLocation(code) {
-    finishLocationMain(code);
-    updateLocations();
 }

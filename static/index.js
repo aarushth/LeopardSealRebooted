@@ -1,12 +1,14 @@
 const flaskAd = 'http://127.0.0.1:5502/'
 const locationErrorPopup = document.getElementById("locationErrorPopup");
 const boxErrorPopup = document.getElementById("boxErrorPopup");
+// console.log("called")
 let state = ["none"]
 function peek(){
-    return state[state.length()-1]
+    return state[state.length-1]
 }
 function init() {
     fetch(flaskAd+'init', {method: 'POST'}) 
+    
 }
 window.onload = init;
 window.onbeforeunload = function () {
@@ -28,7 +30,7 @@ function printDB(){
 
 
 function addLocation(){
-    state.push("loc")
+    
     window.scrollTo(top)
     locationErrorPopup.style.visibility = 'hidden';
     // console.log("trig");
@@ -74,6 +76,7 @@ function submitLocationBarcode(){
 }
 
 async function processLocationSubmissionBarcode(code){
+    state.push("loc")
     imageChange = false;
     window.scrollTo(top)
     document.getElementById("locationPopup").style.visibility = 'visible';
@@ -84,7 +87,7 @@ async function processLocationSubmissionBarcode(code){
     .then(data => {
         document.getElementById("locationNameInput").value = data.name;
         document.getElementById("descriptionInput").value = data.description;
-        document.getElementById("finishDiv").innerHTML = `<button id="history" onClick="locationHistoryPopup(${code})">View History</button> <button id="finish" onClick="finishLocationMain(${code})">finish</button>`
+        document.getElementById("finishDiv").innerHTML = `<button id="history" onClick="locationHistoryPopup(${code})">View History</button> <button id="finish" onClick="finishLocation(${code})">finish</button>`
         document.getElementById("printDiv").innerHTML = `<button id="print"onClick="printLocationBarcode(${code})">print barcode</button>
                         <input type="checkbox" id="includeLocationName">
                         <label id="includeNameLabel">Include Name</label><br>`
@@ -125,9 +128,9 @@ async function locationHistoryPopup(code){
 }
 
 let imageChange = false;
-async function finishLocationMain(code){
+async function finishLocation(code){
     let im = document.getElementById("locImg").src
-    console.log(im);
+    // console.log(im);
     const data = {
         "barcode": code,
         "name": document.getElementById("locationNameInput").value,
@@ -136,12 +139,18 @@ async function finishLocationMain(code){
         "image": document.getElementById("locImg").src,
         "imageChange": imageChange?'y':'n'
     };
-    fetch(flaskAd+`write_location`, {method: 'POST', headers: {'Content-Type': 'application/json'},body: JSON.stringify(data)})
-    .then(data => {
-      console.log(data);
+    await fetch(flaskAd+`write_location`, {method: 'POST', headers: {'Content-Type': 'application/json'},body: JSON.stringify(data)})
+    .then(data =>  {
+      exitLocationPopup();
+      state.pop();
+    //   console.log(data)
+    //   console.log(inLoc)
+      try{
+        updateLocations();
+      }catch(error){
+        console.log("nothing :)")
+      }
     })
-    exitLocationPopup();
-    state.pop();
 }
 
 
@@ -201,7 +210,7 @@ async function processBoxSubmissionBarcode(code){
     .then(data => {
         document.getElementById("boxNameInput").value = data.name;
         document.getElementById("descriptionInput").value = data.description;
-        document.getElementById("finishDiv").innerHTML = `<button id="history" onClick="boxHistoryPopup(${code})">View History</button> <button id="finish" onClick="finishLocationMain(${code})">finish</button>`
+        document.getElementById("finishDiv").innerHTML = `<button id="history" onClick="boxHistoryPopup(${code})">View History</button> <button id="finish" onClick="finishBoxMain(${code}, false)">finish</button>`
         document.getElementById("printDiv").innerHTML = `<button id="print"onClick="printBoxBarcode(${code})">print barcode</button>
                         <input type="checkbox" id="includeBoxName">
                         <label id="includeNameLabel">Include Name and Location</label><br>`
@@ -267,7 +276,7 @@ function exitLocationHistoryPopup(){
 
 
 
-function camera(code){
+function camera(){
     document.getElementById("cameraPopup").style.visibility = 'visible';
     document.getElementById("camera").style.visibility = 'visible';
     startup();
@@ -346,7 +355,7 @@ function retake(){
 
 function save(){
     const data = canvas.toDataURL("image/png");
-    document.getElementById(state.peek()+"Img").src = data;
+    document.getElementById(peek()+"Img").src = data;
     imageChange = true;
     exitCameraPopup();
 }
