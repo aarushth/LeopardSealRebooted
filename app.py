@@ -142,12 +142,12 @@ def write_item():
     if(data['imageChange'] == 'y'):
         response = urllib.request.urlopen(data['image'])
         change = True
-        with open(f'images/I{data['barcode']}_vers{vers}.jpg', 'wb') as f:
+        with open(f"images/I{data['barcode']}_vers{vers}.jpg", 'wb') as f:
             f.write(response.file.read())
 
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO item VALUES (?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['quantity'], data['boxcode'],  f'../images/I{data['barcode']}_vers{vers}.jpg' if change else data['image'], timestamp, vers+1])
+    cur.execute('''INSERT INTO item VALUES (?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['quantity'], data['boxcode'],  f"../images/I{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1])
     
     # codes = boxCodes.split(",")
     # for cod in codes:
@@ -180,12 +180,12 @@ def write_box():
     if(data['imageChange'] == 'y'):
         response = urllib.request.urlopen(data['image'])
         change = True
-        with open(f'images/B{data['barcode']}_vers{vers}.jpg', 'wb') as f:
+        with open(f"images/B{data['barcode']}_vers{vers}.jpg", 'wb') as f:
             f.write(response.file.read())
 
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['volume'], data['size'], data['locationcode'], data['itemcode'], f'../images/B{data['barcode']}_vers{vers}.jpg' if change else data['image'], timestamp, vers+1])
+    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['volume'], data['size'], data['locationcode'], data['itemcode'], f"../images/B{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1])
     
     
     # cur.execute(f"""SELECT * FROM location WHERE barcode='{data['locationcode']}' AND vers = (SELECT MAX(vers) FROM location WHERE barcode='{data['locationcode']}');""")
@@ -244,12 +244,12 @@ def write_location():
     if(data['imageChange'] == 'y'):
         response = urllib.request.urlopen(data['image'])
         change = True
-        with open(f'images/L{data['barcode']}_vers{vers}.jpg', 'wb') as f:
+        with open(f"images/L{data['barcode']}_vers{vers}.jpg", 'wb') as f:
             f.write(response.file.read())
 
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['boxcode'], f'../images/L{data['barcode']}_vers{vers}.jpg' if change else data['image'], timestamp, vers+1])
+    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['boxcode'], f"../images/L{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1])
     conn.commit()
     return "Action completed!", 200
 

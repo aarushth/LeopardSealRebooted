@@ -18,3 +18,9 @@
 #### -in the explorer open the 'templates' folder and open 'index.html'
 #### -in the bottom right click 'Go Live'
 #### -the website should open in your browser. If it shows some folders, cliick on 'templates' and the website should open
+
+
+
+
+#ignore
+sudo chown -R root:www-data <filename>
