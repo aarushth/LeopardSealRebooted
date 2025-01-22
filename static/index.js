@@ -30,7 +30,9 @@ function printDB(){
 
 
 function addLocation(){
-    
+    if(peek() == "none"){
+        state.push("loc")
+    }
     window.scrollTo(top)
     locationErrorPopup.style.visibility = 'hidden';
     // console.log("trig");
@@ -49,9 +51,15 @@ function addLocation(){
     .then(data => {
       for(const location of data.locations){
         // console.log(location)
+        if(peek() == 'box'){
+            func = ''//BoxDisplay
+        }else if (peek() == 'none'){
+            document.getElementById("TitleText").innerHTML = "Select a location"
+            func = 'processLocationSubmissionBarcode'
+        }
         div.innerHTML += 
         `<div class='mini'>
-            <button onClick='processLocationSubmissionBarcode(${location.barcode})'>
+            <button onClick='${func}(${location.barcode})'>
                 <img src='${location.image}'>
                 <p id='name'>${location.name}</p>
                 <p id='code'>${location.barcode}</p>
@@ -65,18 +73,26 @@ function generateNewLocationBarcode(){
     processLocationSubmissionBarcode(Math.floor(Math.random()*(Math.pow(10, 12)))); 
 }
 
-function submitLocationBarcode(){
+async function submitLocationBarcode(){
     let input = document.getElementById('barcodeLocationInput').value
     if(input.match(/^[0-9]+$/) == null){
         locationErrorPopup.style.visibility = locationErrorPopup.style.visibility == 'visible'?'hidden':  'visible';
     }else{
         locationErrorPopup.style.visibility = 'hidden';
-        processLocationSubmissionBarcode(input)
+        await fetch(flaskAd+`pull_location/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+        if(data.vers == ""){
+            processLocationSubmissionBarcode(input)
+        }else{
+            //BoxDisplay
+        }
+    })
+        
     }
 }
 
 async function processLocationSubmissionBarcode(code){
-    state.push("loc")
+    
     imageChange = false;
     window.scrollTo(top)
     document.getElementById("locationPopup").style.visibility = 'visible';
@@ -85,17 +101,19 @@ async function processLocationSubmissionBarcode(code){
     document.getElementById("includeLocationName").checked = false;
     await fetch(flaskAd+`pull_location/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
     .then(data => {
+        console.log(data)
         document.getElementById("locationNameInput").value = data.name;
-        document.getElementById("descriptionInput").value = data.description;
-        document.getElementById("finishDiv").innerHTML = `<button id="history" onClick="locationHistoryPopup(${code})">View History</button> <button id="finish" onClick="finishLocation(${code})">finish</button>`
-        document.getElementById("printDiv").innerHTML = `<button id="print"onClick="printLocationBarcode(${code})">print barcode</button>
+        document.getElementById("locationDescriptionInput").value = data.description;
+        document.getElementById("locationFinishDiv").innerHTML = `<button id="history" onClick="locationHistoryPopup(${code})">View History</button> 
+        <button id="finish" onClick="finishLocation(${code})">finish</button>`
+        document.getElementById("locationPrintDiv").innerHTML = `<button id="print"onClick="printLocationBarcode(${code})">print barcode</button>
                         <input type="checkbox" id="includeLocationName">
                         <label id="includeNameLabel">Include Name</label><br>`
-        document.getElementById("imgButtonDiv").innerHTML = `<button id="imgButton" onClick="camera(${code})">Add/Change Image</button>`
+        document.getElementById("locationImgButtonDiv").innerHTML = `<button id="imgButton" onClick="camera(${code})">Add/Change Image</button>`
         document.getElementById("locImg").src = data.image != ""?data.image:"/resources/imageTemplate.png";
     })
     
-    document.getElementById("barcodeImg").src = getBarcodeSrc(code)+`L${code}`;
+    document.getElementById("locationBarcodeImg").src = getBarcodeSrc(code)+`L${code}`;
     
 }
 
@@ -142,7 +160,11 @@ async function finishLocation(code){
     await fetch(flaskAd+`write_location`, {method: 'POST', headers: {'Content-Type': 'application/json'},body: JSON.stringify(data)})
     .then(data =>  {
       exitLocationPopup();
-      state.pop();
+      if(peek() == "loc"){
+        state.pop();
+      }else if(peek() == "box"){
+      //Display Box
+    }
     //   console.log(data)
     //   console.log(inLoc)
       try{
@@ -188,17 +210,30 @@ async function addBox(){
     })
     console.log(div.innerHTML)
 }
-
-function submitBoxBarcode(){
-    let input = document.getElementById('barcodeBoxInput').value
-    if(input.match(/^[0-9]+$/) == null){
+function generateNewBoxBarcode(){
+    createNewBox(Math.floor(Math.random()*(Math.pow(10, 12))));
+}
+async function submitBoxBarcode(){
+    let code = document.getElementById('barcodeBoxInput').value
+    if(code.match(/^[0-9]+$/) == null){
         boxErrorPopup.style.visibility = boxErrorPopup.style.visibility == 'visible'?'hidden':  'visible';
     }else{
         boxErrorPopup.style.visibility = 'hidden';
-        processBoxSubmissionBarcode(input)
+        await fetch(flaskAd+`pull_box/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+        if(data.vers == ""){
+            code
+            createNewBox(code);
+        }else{
+            processBoxSubmissionBarcode(code, data.locationcode);
+        }
+    })
     }
 }
-
+async function createNewBox(code){
+    addLocation()
+    document.getElementById("TitleText").innerHTML = `Select a location for B${code}`
+}
 async function processBoxSubmissionBarcode(code){
     imageChange = false;
     window.scrollTo(top)
@@ -209,7 +244,7 @@ async function processBoxSubmissionBarcode(code){
     await fetch(flaskAd+`pull_box/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
     .then(data => {
         document.getElementById("boxNameInput").value = data.name;
-        document.getElementById("descriptionInput").value = data.description;
+        // document.getElementById("descriptionInput").value = data.description;
         document.getElementById("finishDiv").innerHTML = `<button id="history" onClick="boxHistoryPopup(${code})">View History</button> <button id="finish" onClick="finishBoxMain(${code}, false)">finish</button>`
         document.getElementById("printDiv").innerHTML = `<button id="print"onClick="printBoxBarcode(${code})">print barcode</button>
                         <input type="checkbox" id="includeBoxName">
@@ -221,7 +256,7 @@ async function processBoxSubmissionBarcode(code){
     document.getElementById("barcodeImg").src = getBarcodeSrc(code)+`L${code}`;
     
 }
-
+//ad display box function
 
 
 function getBarcodeSrc(code){

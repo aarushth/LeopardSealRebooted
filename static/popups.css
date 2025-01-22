@@ -237,6 +237,10 @@ p{margin:0}
     visibility: hidden;
     margin-top: 5%;
     font-size: 1.5vw;
+    #TitleText{
+        margin-bottom: 2%;
+        visibility: inherit;
+    }
     #scan{
         position: relative;
         display: flex;
@@ -289,20 +293,20 @@ p{margin:0}
             
             height:100%;
         }
-        #imgButtonDiv{
+        #locationImgButtonDiv{
             width: 20%;
             height: 100%;
             button{
                 height:100%;
             }
         }
-        #barcodeImg{
+        #locationBarcodeImg{
             margin-top: 0;
             margin-left: 10%;
             height: 100%;
             width: fit-content;
         } 
-        #printDiv{
+        #locationPrintDiv{
             margin-top: 1%;
             width:25%;
             height: 100%;
@@ -347,7 +351,7 @@ p{margin:0}
             width: 70%; 
             height: inherit;  
         }
-        #finishDiv{
+        #locationFinishDiv{
             width:25%;
             height: inherit;
             display:flex;
