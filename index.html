@@ -48,35 +48,67 @@
                     <div id="imgButtonDiv">
                         <button id="imgButton" onClick="camera()">Add/Change Image</button>
                     </div>
-                    <img id="barcodeImg"></img>
-                    <div id="printDiv">
+                    <img id="boxBarcodeImg"></img>
+                    <div id="boxPrintDiv">
                         <button id="print" onClick="printBarcode()">Print Barcode</button>
                         <input type="checkbox" id="includeBoxName">
-                        <label id="includeNameLabel">Include Name</label><br>
+                        <label id="includeNameLabel">Include Name and Location</label><br>
                     </div>
                 </div>
                 <div id="inputDiv">
-                    <input placeholder="Name" id="boxNameInput">
-                    
-                    <textarea placeholder="Description" id="descriptionInput"></textarea>
+                    <div id="left">
+                        <input placeholder="Name" id="boxNameInput">
+                        <div id="boxVolumeSizeDiv">
+                            <div id="boxVolumeSliderDiv">
+                                <label for="boxVolumeSlider">Volume</label>
+                                <input type="range" min="1" max="100" value="50" class="slider" id="boxVolumeSlider">
+                            </div>
+
+                            <div id="boxSizeDiv">
+                                <label for="boxSize">Size:</label>
+
+                                <select name="boxSize" id="boxSize">
+                                    <option value="Small">Small</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Large">Large</option>
+                                    <option value="XLarge">XLarge</option>
+                                    <option value="Bag">Bag</option>
+                                    <option value="Bucket">Bucket</option>
+                                    <option value="None">None</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="right">
+                        <div id="boxLocation">
+                            <p>Location:</p>
+                            <div class='location' id='boxLocationInner'>
+                                
+                            </div>
+                            <button id ="changeLocationButton" onclick="changeLocation()">Change Location</button>
+                        </div>
+
+                        
+                    </div>
                 </div>
                 <div id="finishs">
                     
-                    <div id="itemsSelect" class="selectMain">
+                    <div id="itemsListSelect" class="selectMain">
                         <p>items:</p>
                         <div id="select" class="selectSub">
-                            <div class='mini'>
+                            <!-- <div class='mini'>
                                 <button>
                                     <img src='/resources/imageTemplate.png'>
                                     <p id='name'>${location.name}</p>
                                     <p id='code'>${location.barcode}</p>
                                 </button>
-                            </div>
+                            </div> -->
                             
                             
                         </div>
                     </div>
-                    <div id="finishDiv">
+                    <div id="boxFinishDiv">
                         <button id="history" onClick="boxHistoryPopup()">View History</button>
                         <button id="finish" onClick="finishBoxMain()">Finish</button>
                     </div>
@@ -98,7 +130,7 @@
                 <div id="scan">
                     <input placeholder="Scan Barcode" id="barcodeLocationInput">
                     <p></p>
-                    <button id="submit" onClick="submitLocationBarcode()">submit
+                    <button id="locationSubmit" onClick="submitLocationBarcode()">submit
                         <span class="errorPopup" id="locationErrorPopup">Invalid Barcode</span>
                     </button>
                 </div>
@@ -131,7 +163,7 @@
                     
                     <div id="boxesListSelect" class="selectMain">
                         <p>boxes:</p>
-                        <div id="select" class="selectSub">
+                        <div id="boxesListSelectSub" class="selectSub">
                             <!-- <div class='mini'>
                                 <button>
                                     <img src='/resources/imageTemplate.png'>
@@ -159,13 +191,34 @@
             <div class="xButtonDiv">
                 <button onClick="exitLocationHistoryPopup()"class="x">X</button>
             </div>
-            <div id="historyDiv">
+            <div id="locationHistoryDiv">
                 <div id="titleDiv"><p class='title'>History</p></div>
                 <div id="headerEntry" class="entry">
                     <b id='nameDiv' class='subEntry'>Image</b>
                     <b id='nameDiv' class='subEntry'>Name</b>
                     <b id='descDiv' class='subEntry'>Description</b>
                     <b id='boxDiv' class='subEntry'>Boxes</b>
+                    <b id='timeDiv' class='subEntry'>Time</b>
+                    <b id='versDiv' class='subEntry'>Version</b>
+                </div>
+            </div> 
+        </div>
+    </div>
+    <div id="boxHistoryPopup" class="popup">
+        
+        <div class="container">
+            <div class="xButtonDiv">
+                <button onClick="exitBoxHistoryPopup()"class="x">X</button>
+            </div>
+            <div id="boxHistoryDiv">
+                <div id="titleDiv"><p class='title'>History</p></div>
+                <div id="headerEntry" class="entry">
+                    <b id='imageDiv' class='subEntry'>Image</b>
+                    <b id='nameDiv' class='subEntry'>Name</b>
+                    <b id='volumeDiv' class='subEntry'>Volume</b>
+                    <b id='sizeDiv' class='subEntry'>Size</b>
+                    <b id='locationDiv' class='subEntry'>Location</b>
+                    <b id='itemDiv' class='subEntry'>Items</b>
                     <b id='timeDiv' class='subEntry'>Time</b>
                     <b id='versDiv' class='subEntry'>Version</b>
                 </div>

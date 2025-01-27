@@ -29,7 +29,7 @@ def init():
     if(fetch == []):
         print("creating items table")
         cur.execute("""create table item (
-                            barcode        VARCHAR primary key,
+                            barcode        VARCHAR,
                             name        TINYTEXT,
                             description        TEXT,
                             quantity        INTEGER,
@@ -46,7 +46,7 @@ def init():
     if(fetch == []):
         print("creating box table")
         cur.execute("""create table box (
-                            barcode        VARCHAR primary key,
+                            barcode        VARCHAR,
                             name           TINYTEXT, 
                             volume        INTEGER CHECK(volume < 101),
                             size        TINYTEXT CHECK(size IN ('Small','Medium','Large','XLarge','Bag','Bucket','None','Other') ),
@@ -167,14 +167,17 @@ def write_box():
     data = request.get_json()
     conn = getConn()
     cur =  conn.cursor()
-    oldBox = pull_box_internal(data['barcode'])
+    # oldBox = pull_box_internal(data['barcode'])
+    fetch = pull_box_internal(data['barcode'])
     vers = 0
-    if(oldBox['vers'] != ""):
-        vers = data['vers']
-    if(data['locationcode'] != oldBox['locationcode']):
+    if(fetch['vers'] != ""):
+        vers = fetch['vers']
+
+    if(data['locationcode'] != fetch['locationcode']):
        add_location_boxcode(data['locationcode'], data['barcode'])
-       if(oldBox['locationcode'] != ''):
-           remove_location_boxcode(oldBox['locationcode'], data['barcode'])
+       if(fetch['locationcode'] != ''):
+           print("removed")
+           remove_location_boxcode(fetch['locationcode'], data['barcode'])
     
     change = False
     if(data['imageChange'] == 'y'):
@@ -185,17 +188,7 @@ def write_box():
 
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['volume'], data['size'], data['locationcode'], data['itemcode'], f"../images/B{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1])
-    
-    
-    # cur.execute(f"""SELECT * FROM location WHERE barcode='{data['locationcode']}' AND vers = (SELECT MAX(vers) FROM location WHERE barcode='{data['locationcode']}');""")
-    # fetch = pull_location_internal(data['locationcode'])
-        
-    # boxCodes = fetch[3]
-    # print(boxCodes)
-    # if(data['barcode'] not in boxCodes):
-    #     boxCodes += "," + data['barcode']
-    # cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [fetch[0], fetch[1], fetch[2], boxCodes,  fetch[4], timestamp, fetch[6]+1])
+    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['volume'], data['size'], data['locationcode'], data['itemcode'], f"../images/B{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1])
     conn.commit()
     return "Action completed!", 200
 
@@ -273,11 +266,17 @@ def remove_location_boxcode(code, boxcode):
     timestamp = datetime.datetime.now()
     conn = getConn()
     cur = conn.cursor()
-    boxcodes = fetch['boxcode']+' '
-    boxcodes = boxcodes[0:boxcodes.index(boxcode)] + boxcodes[boxcodes.index(boxcode)+len(boxcode)+2:]
-    if(boxcode[len(boxcode)-1]==' '):
-        boxcode = boxcode[:len(boxcode)-1]
-    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [code, fetch['name'], fetch['description'], boxcodes, fetch['image'], timestamp, vers+1])
+    
+    boxcodes = fetch['boxcode'].split(",")
+    print(boxcodes)
+    # print(boxcode)
+    boxcodes.remove(str(boxcode))
+    print(boxcodes)
+    fincodes = ",".join(boxcodes)
+    print(fincodes)
+    # if(boxcode[len(boxcode)-1]==' '):
+    #     boxcode = boxcode[:len(boxcode)-1]
+    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [code, fetch['name'], fetch['description'], fincodes, fetch['image'], timestamp, vers+1])
     conn.commit()
     return 
 

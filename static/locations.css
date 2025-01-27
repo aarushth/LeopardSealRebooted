@@ -26,22 +26,22 @@ button:hover{
 
 .location{  
     display: flex;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
     justify-content:space-evenly;
     background-color: rgba(0, 0, 0, 0.3);
 
     width: 47%;
-    min-height:23vh;
-
+    /* min-height:23vh; */
+    height: fit-content;
     margin-top: 0.5%;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 
     border-radius: 10px;
     .locArrowDiv{
         display: flex;
-        flex-wrap: wrap;
+        /* flex-wrap: wrap; */
         width:15%;
-        height: 98%;
+        margin-top: 0.5%;
         justify-content: center;
         align-items: center;
         .locArrowSVG{
@@ -62,8 +62,8 @@ button:hover{
         margin-top: 1%;
         margin-bottom: 1%;
         
-        height: 95%;
         width: 30%;
+        height: fit-content;
         padding: 0;
         .locImg{
             border-radius: 8px;
@@ -154,7 +154,7 @@ button:hover{
     flex-wrap: wrap;
     justify-content:space-evenly;
     width: 47%;
-    height:23vh;
+    height:fit-content;
     margin-top: 0.5%;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
@@ -189,7 +189,7 @@ button:hover{
                 
                 height: 100%;
                 width: 100%;
-                font-size: 3.7vw;
+                font-size: min(3vw, 8vh);
                 margin: 0;
             }
         }
