@@ -2,24 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/static/index.css" />
-    <link rel="stylesheet" href="/static/popups.css" />
+    <link rel="stylesheet" href="/static/popups.css"/>
+    <link rel="stylesheet" href="/static/boxes.css" />
+
     <script defer src="/static/index.js"></script>
+    <script defer src="/static/boxes.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Tracker</title>
+    <title>Locations</title>
 </head>
 <body>
     <div id="main">
-        <div id="input" class="box">
-            <p class="title">Quick Actions</p>     
-            <div id="buttons">
-                <button onClick="printDB()">Print Database</button>
-                <button onCLick="resetDB()">Reset Database</button>
-                <button onClick="addLocation()">Add/Edit Location</button>
-                <button onClick="addBox()">Add/Edit Box</button>
-                <button onClick="location.href='/templates/boxes.html'">Boxes</button>
-                <button onclick="location.href='/templates/locations.html'">Locations</button>
+        <div id="boxesMain" class="box">
+            <div id="header">
+                <div id="buttonDiv">
+                    <button id="Home" onclick="location.href='../index.html'">Home</button>
+                </div>
+                <p>Boxes</p>
             </div>
+            
+            <div id="boxes"></div>
         </div>
     </div>
     <div id="boxPopup" class="popup">

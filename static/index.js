@@ -304,6 +304,7 @@ async function processBoxSubmissionBarcode(code, locationCode){
     
     await fetch(flaskAd+`pull_location/${locationCode}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
     .then(data => {
+        console.log(locationCode)
         document.getElementById("boxLocationInner").innerHTML = 
         `<div class='images'>
             <img class='locImg' src='${data.image}'>
@@ -313,7 +314,7 @@ async function processBoxSubmissionBarcode(code, locationCode){
             <p id='boxLocBarcode' class='locBarcode'>${data.barcode}</p>
             <p class='locDescription'>${data.description}</p>
         </div>`
-
+        document.getElementById("boxLocationInner").onclick = () => processLocationSubmissionBarcode(locationCode)
     })
     document.getElementById("boxBarcodeImg").src = getBarcodeSrc(code)+`B${code}`;
     
