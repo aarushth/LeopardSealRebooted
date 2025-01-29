@@ -129,15 +129,14 @@ def write_item():
     data = request.get_json()
     conn = getConn()
     cur =  conn.cursor()
-    # cur.execute(f"""SELECT MAX(vers) FROM item WHERE barcode='{code}';""")
-    # fetch =  cur.fetchone()
     oldItem = pull_item_internal(data['barcode'])
     vers = 0
     if(oldItem['vers'] != ""):
         vers = data['vers']
     if(data['boxcode'] != oldItem['boxcode']):
         add_box_itemcode(oldItem['boxcode'], data['barcode'])
-    
+        if(oldItem['boxcode'] != ''):
+            remove_box_itemcode(oldItem['boxcode'], data['barcode'])
     change = False
     if(data['imageChange'] == 'y'):
         response = urllib.request.urlopen(data['image'])
@@ -147,18 +146,7 @@ def write_item():
 
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO item VALUES (?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['quantity'], data['boxcode'],  f"../images/I{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1])
-    
-    # codes = boxCodes.split(",")
-    # for cod in codes:
-    #     cur.execute(f"""SELECT * FROM box WHERE barcode='{cod}' AND vers = (SELECT MAX(vers) FROM box WHERE barcode='{cod}');""")
-    #     fetch =  cur.fetchall()
-        
-    #     for box in fetch:
-    #         itemCodes = box[4]
-    #         if(code not in itemCodes):
-    #             itemCodes += "," + code
-    #         cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?) ''', [box[0], box[1], newBoxVol, box[3], box[4], itemCodes, timestamp, box[7]+1])
+    cur.execute('''INSERT INTO item VALUES (?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['quantity'], data['boxcode'],  f"../images/I{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1]) 
     conn.commit()
     return "Action completed!", 200
 
@@ -167,17 +155,14 @@ def write_box():
     data = request.get_json()
     conn = getConn()
     cur =  conn.cursor()
-    # oldBox = pull_box_internal(data['barcode'])
     fetch = pull_box_internal(data['barcode'])
     vers = 0
     if(fetch['vers'] != ""):
         vers = fetch['vers']
-
     if(data['locationcode'] != fetch['locationcode']):
        add_location_boxcode(data['locationcode'], data['barcode'])
        if(fetch['locationcode'] != ''):
-           print("removed")
-           remove_location_boxcode(fetch['locationcode'], data['barcode'])
+            remove_location_boxcode(fetch['locationcode'], data['barcode'])
     
     change = False
     if(data['imageChange'] == 'y'):
@@ -212,11 +197,14 @@ def remove_box_itemcode(code, itemcode):
     timestamp = datetime.datetime.now()
     conn = getConn()
     cur = conn.cursor()
-    itemcodes = fetch['itemcode']+' '
-    itemcodes = itemcodes[0:itemcodes.index(itemcode)] + itemcodes[itemcodes.index(itemcode)+len(itemcode)+2:]
+    
+    itemcodes = fetch['itemcode'].split(",")
+    itemcodes.remove(str(itemcode))
+    fincodes = ",".join(itemcodes)
+
     if(itemcode[len(itemcode)-1]==' '):
         itemcode = itemcode[:len(itemcode)-1]
-    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ''', [code, fetch['name'], fetch['volume'], fetch['size'], fetch['locationcode'], itemcodes, fetch['image'], timestamp, vers+1])
+    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ''', [code, fetch['name'], fetch['volume'], fetch['size'], fetch['locationcode'], fincodes, fetch['image'], timestamp, vers+1])
     conn.commit()
     return 
 
@@ -268,14 +256,8 @@ def remove_location_boxcode(code, boxcode):
     cur = conn.cursor()
     
     boxcodes = fetch['boxcode'].split(",")
-    print(boxcodes)
-    # print(boxcode)
     boxcodes.remove(str(boxcode))
-    print(boxcodes)
     fincodes = ",".join(boxcodes)
-    print(fincodes)
-    # if(boxcode[len(boxcode)-1]==' '):
-    #     boxcode = boxcode[:len(boxcode)-1]
     cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [code, fetch['name'], fetch['description'], fincodes, fetch['image'], timestamp, vers+1])
     conn.commit()
     return 
