@@ -1,7 +1,7 @@
 ﻿# LeopardSealRebooted
 #### this is a new version of leopard seal made from parts of the POE.html file and the old database.py file. It uses python to interface with a sqlite3 database. The python file is running on a Flask server, and then the vanila website (html, css, javascript) sends queries to the flask server to send and receive data to the db.
 
-## How to run
+## How to run Windows VSCODE
 ### 1. Clone repository and open in VSCode
 #### -You know how to do this :)
 ### 2. Make sure all required software is installed
@@ -19,6 +19,12 @@
 #### -in the bottom right click 'Go Live'
 #### -the website should open in your browser. If it shows some folders, cliick on 'templates' and the website should open
 
+
+## How to run on pi
+### 1. Open a terminal and run cd /var/www/LeopardSealRebooted
+### 2. Run git pull
+### 3. Run python app.py
+### 4. Open a browser and navigate to localhost
 
 
 
