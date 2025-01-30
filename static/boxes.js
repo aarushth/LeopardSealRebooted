@@ -41,7 +41,7 @@ async function updateBoxes(){
             <div class='header'>
                 <p class='boxName'>${box.name}</p>
                 <p class='boxBarcode'>${box.barcode}</p>
-                <p class='boxLocation'>@Loc_${box.locationcode}</p>
+                <p class='boxLocation'>@${locName}_${box.locationcode}</p>
             </div>
             <div class='boxArrowDiv'>
                 <div class='boxArrowSVG'>

@@ -160,12 +160,15 @@ async function locationHistoryPopup(code){
 let imageChange = false;
 async function finishLocation(code){
     let im = document.getElementById("locImg").src
+    if(!imageChange && im.endsWith("/resources/imageTemplate.png")){
+        im = "/resources/imageTemplate.png"
+    }
     const data = {
         "barcode": code,
         "name": document.getElementById("locationNameInput").value,
         "description": document.getElementById("locationDescriptionInput").value,
         "boxcode": "",
-        "image": document.getElementById("locImg").src,
+        "image": im,
         "imageChange": imageChange?'y':'n'
     };
     await fetch(flaskAd+`write_location`, {method: 'POST', headers: {'Content-Type': 'application/json'},body: JSON.stringify(data)})
@@ -362,7 +365,10 @@ async function editLocationBoxSubmissionBarcode(code, locationCode){
 }
 
 async function finishBox(code){
-    let im = document.getElementById("locImg").src
+    let im = document.getElementById("boxImg").src
+    if(!imageChange && im.endsWith("/resources/imageTemplate.png")){
+        im = "/resources/imageTemplate.png"
+    }
     const data = {
         "barcode": code,
         "name": document.getElementById("boxNameInput").value,
@@ -370,7 +376,7 @@ async function finishBox(code){
         "size":  document.getElementById("boxSize").value,
         "locationcode": document.getElementById("boxLocBarcode").innerText,
         "itemcode": "",
-        "image": document.getElementById("boxImg").src,
+        "image": im,
         "imageChange": imageChange?'y':'n'
                     
     };

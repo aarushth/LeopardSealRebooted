@@ -146,7 +146,7 @@ def write_item():
 
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO item VALUES (?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['quantity'], data['boxcode'],  f"../images/I{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1]) 
+    cur.execute('''INSERT INTO item VALUES (?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['quantity'], data['boxcode'],  f"images/I{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1]) 
     conn.commit()
     return "Action completed!", 200
 
@@ -164,16 +164,20 @@ def write_box():
        if(fetch['locationcode'] != ''):
             remove_location_boxcode(fetch['locationcode'], data['barcode'])
     
-    change = False
     if(data['imageChange'] == 'y'):
         response = urllib.request.urlopen(data['image'])
-        change = True
-        with open(f"images/B{data['barcode']}_vers{vers}.jpg", 'wb') as f:
+        imUrl = f"/images/B{data['barcode']}_vers{vers}.jpg"
+        with open(imUrl[1:], 'wb') as f:
             f.write(response.file.read())
+    else:
+        if(fetch["image"] == ""):
+            imUrl = data["image"]
+        else:
+            imUrl = fetch["image"]
 
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['volume'], data['size'], data['locationcode'], data['itemcode'], f"../images/B{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1])
+    cur.execute('''INSERT INTO box VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['volume'], data['size'], data['locationcode'], data['itemcode'], imUrl, timestamp, vers+1])
     conn.commit()
     return "Action completed!", 200
 
@@ -221,16 +225,20 @@ def write_location():
         vers = fetch['vers']
     
     # print(data['image'])
-    change = False
     if(data['imageChange'] == 'y'):
         response = urllib.request.urlopen(data['image'])
-        change = True
-        with open(f"images/L{data['barcode']}_vers{vers}.jpg", 'wb') as f:
+        imUrl = f"/images/L{data['barcode']}_vers{vers}.jpg"
+        with open(imUrl[1:], 'wb') as f:
             f.write(response.file.read())
+    else:
+        if(fetch["image"] == ""):
+            imUrl = data["image"]
+        else:
+            imUrl = fetch["image"]
 
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['boxcode'], f"../images/L{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1])
+    cur.execute('''INSERT INTO location VALUES (?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['boxcode'], imUrl, timestamp, vers+1])
     conn.commit()
     return "Action completed!", 200
 
