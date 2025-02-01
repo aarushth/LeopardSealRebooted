@@ -114,6 +114,9 @@ p{margin:0}
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
         }
+        #location{
+            font-size: 0.8vw;
+        }
     }
 }
 #main{
@@ -661,8 +664,6 @@ p{margin:0}
     }
 
 }
-
-
 #boxHistoryDiv{
     width: 100%;
     height: 100%;
@@ -701,6 +702,281 @@ p{margin:0}
         }
         #itemDiv{
             width: 20%;
+        }
+        #timeDiv{
+            width: 10%;
+        }
+        #versDiv{
+            width: 5%;
+        }
+        .subEntry{
+            font-size: 1vw;
+            line-height: 1.5em;
+            height: 3em;
+            overflow-x: hidden;
+            overflow-y: auto;
+            white-space: wrap;
+            text-wrap: wrap;
+            text-align: center;
+            overflow-wrap: break-word;
+        }
+    }
+}
+
+
+#itemBarcode{
+    position: absolute;
+    width: inherit;
+    visibility: hidden;
+    margin-top: 5%;
+    font-size: 1.5vw;
+    #scan{
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        height: fit-content;
+        p{
+            width: 20%;
+            height: fit-content;
+        }
+        input{
+            font-size: 1.5vw;
+            width:100%;
+            height: 20%;
+        }
+        #submit{
+            margin-top: 2%;
+            width:20%;
+            height:fit-content;
+            padding-top: 2%;
+            padding-bottom: 2%;
+        }
+    }
+    
+    .or{
+        text-align: center;
+        
+        margin-top: 1%;
+    }
+}
+#itemInfo{
+    visibility: hidden;
+    display: flex;
+    position: absolute;
+    margin-top: 3%;
+    width: inherit;
+    height: inherit;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-content: center;
+    #topDiv{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        width: 100%;
+        height: 15vh;
+        padding-inline: 3%;
+        #itemImg{
+            
+            height:100%;
+        }
+        #itemImgButtonDiv{
+            width: 20%;
+            height: 100%;
+            button{
+                height:100%;
+            }
+        }
+        #itemBarcodeImg{
+            margin-top: 0;
+            margin-left: 10%;
+            height: 100%;
+            width: fit-content;
+        } 
+        #itemPrintDiv{
+            margin-top: 1%;
+            width:25%;
+            height: 100%;
+            #print{
+                width: 100%;
+            }
+        }
+    } 
+    #inputDiv{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        width: 100%;
+        height: 25vh;
+        #left{
+            width: 50%;
+            input{
+                font-size: 1.5vw;
+                width:97%;
+                height: fit-content;
+                margin-top: 1%;
+            }
+        }
+        #right{
+            width: 50%;
+            display: flex;
+            flex-wrap: wrap;
+            #itemBox{
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-evenly;
+                p{
+                    width: 100%;
+                }
+                #changeBoxButton{
+                    /* margin-left: 2%; */
+                    margin-top: 0.5%;
+                    width: 25%;
+                    height: fit-content;
+                    padding-block: 7.5%;
+                    text-align: center;
+                }
+            }
+        }
+    }
+    
+    #finishs{
+        width: 100%;
+        height: 36vh;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding-inline: 3%;
+        #itemsListSelect{
+            width: 70%; 
+            height: inherit;  
+        }
+        #boxFinishDiv{
+            width:25%;
+            height: inherit;
+            display:flex;
+            flex-wrap: wrap;
+            justify-content:space-evenly;
+            button{
+                margin-top: 5%;
+                /* height: fit-content; */
+                width: 100%;
+                
+            }
+        }
+    }  
+}
+#itemBoxOuter{  
+    width: 70%;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    /* width: fit-content; */
+    height: fit-content;
+    /* width: 100%; */
+    padding: 0;
+    margin-top: 0.5%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    
+
+    border-radius: 10px;
+    #itemBoxInner{
+        
+        height: fit-content;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content:space-evenly;
+        .images{
+            /* margin-top: 1%; */
+            /* margin-bottom: 1%; */
+            
+            height: fit-content;
+            width: 40%;
+            padding: 0;
+            .boxImg{
+                border-radius: 8px;
+                background-color: rgb(255, 127, 127);
+                width: 100%;
+                height: fit-content;
+            }
+        }
+        .header{
+            /* margin-top: 1%; */
+            /* margin-bottom: 1%; */
+            width:45%;
+            height: 98%;
+            .boxName{
+                display: flex;
+                margin: 0;
+                height: fit-content;
+                font-size: 2vw;
+                width:100%;
+                text-align:left;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+            }
+            .boxBarcode{
+                display:flex;
+                
+                font-size: 1vw;
+                width: 100%;
+                text-align: left;
+            }   
+            .boxDescription{
+                margin-top: 5%;
+                font-size: 1.2vw;
+                text-overflow: ellipsis;
+                text-align: start;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+            
+        }
+    }
+
+}
+#itemHistoryDiv{
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    #titleDiv{
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+        p{
+            text-align: center;
+        }
+    }
+    .entry{
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        border-bottom: 1px solid grey;
+        padding-bottom: 1%;
+        padding-top: 1%;
+        height: fit-content;
+        #imageDiv{
+            width:12%;
+            height:fit-content;
+        }
+        #nameDiv{
+            width:15%;
+        }
+        #descriptionDiv{
+            width: 10%;
+        }
+        #quantityDiv{
+            width: 10%;
+        }
+        #boxDiv{
+            width: 10%;
         }
         #timeDiv{
             width: 10%;

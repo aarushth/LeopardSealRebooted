@@ -1,9 +1,9 @@
 const flaskAd = 'http://127.0.0.1:5502/'
 const locationErrorPopup = document.getElementById("locationErrorPopup");
 const boxErrorPopup = document.getElementById("boxErrorPopup");
+const itemErrorPopup = document.getElementById("itemErrorPopup");
 
 let state = ["none"]
-// state = "none"
 function peek(){
     return state[state.length-1]
 }
@@ -16,22 +16,18 @@ window.onbeforeunload = function () {
     fetch(flaskAd+'quit')
 };
 
-
 function resetDB(){
     if(confirm('Are you sure?')) {
         fetch(flaskAd+'reset', {method: 'POST'});
         init();
     }
 }
-
-
 function printDB(){
     fetch(flaskAd+'print').then(response => response.text())  // Use .text() to read plain text
     .then(data => {
       console.log(data);
     })
 }
-
 
 function addLocation(){
     window.scrollTo(top)
@@ -65,11 +61,9 @@ function addLocation(){
       }
     })
 }
-
 function generateNewLocationBarcode(){
     processLocationSubmissionBarcode(Math.floor(Math.random()*(Math.pow(10, 12)))); 
 }
-
 async function submitLocationBarcode(){
     let input = document.getElementById('barcodeLocationInput').value
     if(input.match(/^[0-9]+$/) == null){
@@ -84,7 +78,6 @@ async function submitLocationBarcode(){
         
     }
 }
-
 async function processLocationSubmissionBarcode(code){
     state.push("loc")
     imageChange = false;
@@ -128,7 +121,6 @@ async function processLocationSubmissionBarcode(code){
     document.getElementById("locationBarcodeImg").src = getBarcodeSrc(code)+`L${code}`;
     
 }
-
 async function locationHistoryPopup(code){
     document.getElementById("locationHistoryPopup").style.visibility = 'visible';
     div = document.getElementById("locationHistoryDiv");
@@ -156,7 +148,6 @@ async function locationHistoryPopup(code){
 
     });
 }
-
 let imageChange = false;
 async function finishLocation(code){
     let im = document.getElementById("locImg").src
@@ -201,15 +192,19 @@ async function addBox(){
                     </div>`
     
     await fetch(flaskAd+'pull_all_boxes').then(response => response.json())  // Use .text() to read plain text
-    .then(data => {
+    .then(async data => {
+        
       for(const box of data.boxes){
+        await fetch(flaskAd+'pull_location/'+box.locationcode).then(response => response.json()).then(data => {
+            locName = data.name
+        })
         div.innerHTML += 
         `<div class='mini'>
             <button onClick='processBoxSubmissionBarcode(${box.barcode}, ${box.locationcode})'>
                 <img src='${box.image}'>
                 <p id='name'>${box.name}</p>
                 <p id='code'>${box.barcode}</p>
-                <p id='location'>@ L${box.locationcode}</p>
+                <p id='location'>@_${locName}</p>
             </button>
         </div>`
       }
@@ -234,6 +229,7 @@ async function submitBoxBarcode(){
     })
     }
 }
+//
 async function createNewBox(code){
     window.scrollTo(top)
     locationErrorPopup.style.visibility = 'hidden';
@@ -347,8 +343,7 @@ async function editLocationBoxSubmissionBarcode(code, locationCode){
     locationErrorPopup.style.visibility = 'hidden'
     document.getElementById("boxInfo").style.visibility = 'visible';
     document.getElementById("changeLocationButton").onclick = () => changeLocation(code)
-    // document.getElementById("includeBoxName").checked = false;
-    await fetch(flaskAd+`pull_location/${locationCode}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    await fetch(flaskAd+`pull_location/${locationCode}`, {method: 'GET'}).then(response => response.json())
     .then(data => {
         document.getElementById("boxLocationInner").innerHTML = 
         `<div class='images'>
@@ -360,10 +355,7 @@ async function editLocationBoxSubmissionBarcode(code, locationCode){
             <p id='boxLocDescription' class='locDescription'>${data.description}</p>
         </div>`
     })
-    // document.getElementById("boxBarcodeImg").src = getBarcodeSrc(code)+`B${code}`;
-    
 }
-
 async function finishBox(code){
     let im = document.getElementById("boxImg").src
     if(!imageChange && im.endsWith("/resources/imageTemplate.png")){
@@ -390,7 +382,6 @@ async function finishBox(code){
       }
     })
 }
-
 async function boxHistoryPopup(code){
     document.getElementById("boxHistoryPopup").style.visibility = 'visible';
     div = document.getElementById("boxHistoryDiv");
@@ -449,6 +440,66 @@ async function changeLocation(code){
     })
 }
 
+
+async function addItem(){
+    
+    window.scrollTo(top)
+    itemErrorPopup.style.visibility = 'hidden';
+    document.getElementById("itemPopup").style.visibility = 'visible';
+    document.getElementById("itemBarcode").style.visibility = 'visible';
+    document.getElementById("barcodeItemInput").value = "";
+    document.getElementById("barcodeItemInput").focus();
+    let div = document.getElementById("itemSelect");
+    div.innerHTML = `<div id='add' class='mini'>
+                        <button onClick='generateNewItemBarcode()'>
+                            <p id="plus">+</p>
+                            <p id="text">Add new Item</p>
+                        </button>
+                    </div>`
+    
+    await fetch(flaskAd+'pull_all_items').then(response => response.json())  // Use .text() to read plain text
+    .then(async data => {
+        
+      for(const item of data.items){
+        await fetch(flaskAd+'pull_box/'+item.boxcode).then(response => response.json()).then(async box => {
+            boxName = box.name
+            await fetch(flaskAd+'pull_location/'+data.locationcode).then(response => response.json()).then(loc => {
+                locName = loc.name
+            })
+        })
+        div.innerHTML += 
+        `<div class='mini'>
+            <button onClick='processItemSubmissionBarcode(${item.barcode}, ${item.boxcode})'>
+                <img src='${item.image}'>
+                <p id='name'>${item.name}</p>
+                <p id='code'>${item.barcode}</p>
+                <p id='box'>@_${boxName}</p>
+                <p id='location'>@_${locName}</p>
+            </button>
+        </div>`
+      }
+    })
+}
+function generateNewBoxBarcode(){
+    createNewItem(Math.floor(Math.random()*(Math.pow(10, 12))));
+}
+async function submitItemBarcode(){
+    let code = document.getElementById('barcodeItemInput').value
+    if(code.match(/^[0-9]+$/) == null){
+        itemErrorPopup.style.visibility = itemErrorPopup.style.visibility == 'visible'?'hidden':  'visible';
+    }else{
+        itemErrorPopup.style.visibility = 'hidden';
+        await fetch(flaskAd+`pull_item/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+        if(data.vers == ""){
+            createNewItem(code);
+        }else{
+            processItemSubmissionBarcode(code, data.boxcode);
+        }
+    })
+    }
+}
+
 function getBarcodeSrc(code){
     return `https://barcode.orcascan.com/?type=code128&data=${code}&format=jpeg&text=`;    
 }
@@ -501,6 +552,15 @@ function exitBoxPopup(){
         state.pop()
     }
 }
+function exitItemPopup(){
+    document.getElementById("itemBarcode").style.visibility = 'hidden'
+    document.getElementById("itemInfo").style.visibility = 'hidden'
+    document.getElementById("itemPopup").style.visibility = 'hidden'
+    itemErrorPopup.style.visibility = 'hidden'
+    if(peek() === 'item'){
+        state.pop()
+    }
+}
 function exitCameraPopup(){
     document.getElementById("cameraPopup").style.visibility = 'hidden'
     document.getElementById("camera").style.visibility = 'hidden';
@@ -515,7 +575,6 @@ function exitCameraPopup(){
 function exitLocationHistoryPopup(){
     document.getElementById("locationHistoryPopup").style.visibility = 'hidden';
 }
-
 function exitBoxHistoryPopup(){
     document.getElementById("boxHistoryPopup").style.visibility = 'hidden';
 }

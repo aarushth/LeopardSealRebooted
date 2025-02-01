@@ -123,30 +123,35 @@ def print_out():
     # return "items:\n" + str(fetch1) + "\nboxes:\n" + str(fetch2) + "\nlocations:\n" + str(fetch3)
     return Response("items:\n" + str(fetch1) + "\nboxes:\n" + str(fetch2) + "\nlocations:\n" + str(fetch3), content_type='text/plain')
 
-#old
+
 @app.route('/write_item', methods=['POST'])
 def write_item():
     data = request.get_json()
     conn = getConn()
     cur =  conn.cursor()
-    oldItem = pull_item_internal(data['barcode'])
+    fetch = pull_item_internal(data['barcode'])
     vers = 0
-    if(oldItem['vers'] != ""):
+    if(fetch['vers'] != ""):
         vers = data['vers']
-    if(data['boxcode'] != oldItem['boxcode']):
-        add_box_itemcode(oldItem['boxcode'], data['barcode'])
-        if(oldItem['boxcode'] != ''):
-            remove_box_itemcode(oldItem['boxcode'], data['barcode'])
-    change = False
+    if(data['boxcode'] != fetch['boxcode']):
+        add_box_itemcode(fetch['boxcode'], data['barcode'])
+        if(fetch['boxcode'] != ''):
+            remove_box_itemcode(fetch['boxcode'], data['barcode'])
+    
     if(data['imageChange'] == 'y'):
         response = urllib.request.urlopen(data['image'])
-        change = True
-        with open(f"images/I{data['barcode']}_vers{vers}.jpg", 'wb') as f:
+        imUrl = f"/images/I{data['barcode']}_vers{vers}.jpg"
+        with open(imUrl[1:], 'wb') as f:
             f.write(response.file.read())
+    else:
+        if(fetch["image"] == ""):
+            imUrl = data["image"]
+        else:
+            imUrl = fetch["image"]
 
     timestamp = datetime.datetime.now()
     
-    cur.execute('''INSERT INTO item VALUES (?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['quantity'], data['boxcode'],  f"images/I{data['barcode']}_vers{vers}.jpg" if change else data['image'], timestamp, vers+1]) 
+    cur.execute('''INSERT INTO item VALUES (?, ?, ?, ?, ?, ?, ?, ?) ''', [data['barcode'], data['name'], data['description'], data['quantity'], data['boxcode'],  imUrl, timestamp, vers+1]) 
     conn.commit()
     return "Action completed!", 200
 
@@ -305,6 +310,7 @@ def pull_item(code)->tuple:
     return jsonify(pull_item_internal(code)), 200
 
 
+
 def pull_box_internal(code, vers=None):
     conn = getConn()
     cur =  conn.cursor()
@@ -341,6 +347,7 @@ def pull_box(code):
     return jsonify(pull_box_internal(code)), 200
 
 
+
 def pull_location_internal(code, vers=None):
     
     conn = getConn()
@@ -371,6 +378,7 @@ def pull_location_internal(code, vers=None):
 @app.route('/pull_location/<code>')
 def pull_location(code):
     return jsonify(pull_location_internal(code)), 200
+
 
 
 @app.route('/pull_all_locations')
@@ -405,6 +413,7 @@ def pull_all_items():
     for code in fetch:
         response["items"].append(pull_item_internal(code[0]))
     return jsonify(response), 200
+
 
 
 @app.route('/pull_item_history/<code>')

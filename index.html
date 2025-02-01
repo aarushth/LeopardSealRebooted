@@ -15,12 +15,83 @@
             <div id="buttons">
                 <button onclick="location.href='/templates/locations.html'">Locations</button>
                 <button onClick="location.href='/templates/boxes.html'">Boxes</button>
-                <button onClick="printDB()">Print Database</button>
+                <button onclick="confirm('there is no Items page :)')">Items</button>
+                
                 
                 <button onClick="addLocation()">Add/Edit Location</button>
                 <button onClick="addBox()">Add/Edit Box</button>
+                <button onClick="addItem()">Add/Edit Item</button>
+
+                <button onClick="printDB()">Print Database</button>
                 <button onClick="resetDB()">Reset Database</button>
-                <button>THis is here</button>
+            </div>
+        </div>
+    </div>
+    <div id="itemPopup" class="popup">
+        
+        <div class="container">
+            <div class="xButtonDiv">
+                <button onClick="exitItemPopup()"class="x">X</button>
+            </div>
+            <div id="itemBarcode">
+                <div id="scan">
+                    <input placeholder="Scan Barcode" id="barcodeItemInput">
+                    <p></p>
+                    <button id="submit" onClick="submitItemBarcode()">submit
+                        <span id="itemErrorPopup" class="errorPopup">Invalid Barcode</span>
+                    </button>
+                </div>
+                <p class="or">OR</p>
+                <div id="select" class="selectMain">
+                    <p>Select item:</p>
+                    <div id="itemsSelect" class="selectSub">
+                    </div>
+                </div>
+            </div>
+            <div id="itemInfo">
+                <div id="topDiv">
+                    <img id="itemImg" src=""></img>
+                    <div id="imgButtonDiv">
+                        <button id="imgButton" onClick="camera()">Add/Change Image</button>
+                    </div>
+                    <img id="itemBarcodeImg"></img>
+                    <div id="itemPrintDiv">
+                        <button id="print" onClick="printBarcode()">Print Barcode</button>
+                        <input type="checkbox" id="includeItemName">
+                        <label id="includeNameLabel">Include Name, Box and Location</label><br>
+                    </div>
+                </div>
+                <div id="inputDiv">
+                    <div id="left">
+                        <input placeholder="Name" id="itemNameInput">
+                        <textarea placeholder="Description" id="locationDescriptionInput"></textarea>
+                        <div id="itemQuantityDiv">
+                            <button>--</button>
+                            <button>-</button>
+                            <p>0</p>
+                            <button>+</button>
+                            <button>++</button>
+                        </div>
+                    </div>
+                    <div id="right">
+                        <div id="itemBox">
+                            <p>Box:</p>
+                            <div id='itemBoxOuter'>
+                                <button id ='itemBoxInner'></button>
+                            </div>
+                            <button id ="changeBoxButton" onclick="changeBox()">Change Box</button>
+                        </div>
+
+                        
+                    </div>
+                </div>
+                <div id="finishs">    
+                    <div id="itemFinishDiv">
+                        <button id="history" onClick="itemHistoryPopup()">View History</button>
+                        <button id="finish" onClick="finishItemMain()">Finish</button>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>
@@ -63,7 +134,7 @@
                         <input placeholder="Name" id="boxNameInput">
                         <div id="boxVolumeSizeDiv">
                             <div id="boxVolumeSliderDiv">
-                                <label for="boxVolumeSlider">Volume</label>
+                                <label for="boxVolumeSlider">Volume:</label>
                                 <input type="range" min="1" max="100" value="50" class="slider" id="boxVolumeSlider">
                             </div>
 
