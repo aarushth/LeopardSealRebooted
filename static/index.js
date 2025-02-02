@@ -8,12 +8,15 @@ function peek(){
     return state[state.length-1]
 }
 function init() {
-    fetch(flaskAd+'init', {method: 'POST'}) 
     
+    fetch(flaskAd+'init', {method: 'POST'}) 
+    updateAlerts();
+    document.getElementById("searchBar").value = '';
 }
 window.onload = init;
 window.onbeforeunload = function () {
     fetch(flaskAd+'quit')
+    
 };
 
 function resetDB(){
@@ -190,7 +193,7 @@ async function addBox(){
                             <p id="text">Add new box</p>
                         </button>
                     </div>`
-    
+    document.getElementById("boxTitleText").innerText = 'Select a Box'
     await fetch(flaskAd+'pull_all_boxes').then(response => response.json())  // Use .text() to read plain text
     .then(async data => {
         
@@ -204,10 +207,11 @@ async function addBox(){
                 <img src='${box.image}'>
                 <p id='name'>${box.name}</p>
                 <p id='code'>${box.barcode}</p>
-                <p id='location'>@_${locName}</p>
+                <p id='location'>@${locName}</p>
             </button>
         </div>`
       }
+    
     })
 }
 function generateNewBoxBarcode(){
@@ -229,7 +233,6 @@ async function submitBoxBarcode(){
     })
     }
 }
-//
 async function createNewBox(code){
     window.scrollTo(top)
     locationErrorPopup.style.visibility = 'hidden';
@@ -240,7 +243,7 @@ async function createNewBox(code){
     document.getElementById("barcodeLocationInput").focus();
     let div = document.getElementById("locationsSelect")
     div.innerHTML = ``
-    document.getElementById("TitleText").innerText = 'Select a Location for B' + code 
+    document.getElementById("locationTitleText").innerText = 'Select a Location for B' + code 
     fetch(flaskAd+'pull_all_locations').then(response => response.json())  // Use .text() to read plain text
     .then(data => {
       for(const location of data.locations){
@@ -284,14 +287,14 @@ async function processBoxSubmissionBarcode(code, locationCode){
     document.getElementById("boxInfo").style.visibility = 'visible';
     document.getElementById("changeLocationButton").onclick = () => changeLocation(code)
     document.getElementById("includeBoxName").checked = false;
-    document.getElementById("TitleText").innerText = 'Select a Location' + code 
+ 
     
     await fetch(flaskAd+`pull_box/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
-    .then(data => {
+    .then(async data => {
         document.getElementById("boxNameInput").value = data.name;
         // document.getElementById("descriptionInput").value = data.description;
         document.getElementById("boxFinishDiv").innerHTML = `<button id="history" onClick="boxHistoryPopup(${code})">View History</button> 
-        <button id="finish" onClick="finishBox(${code}, false)">finish</button>`
+        <button id="finish" onClick="finishBox(${code})">finish</button>`
         document.getElementById("boxPrintDiv").innerHTML = `<button id="print"onClick="printBoxBarcode(${code})">print barcode</button>
                         <input type="checkbox" id="includeBoxName">
                         <label id="includeNameLabel">Include Name and Location</label><br>`
@@ -299,22 +302,44 @@ async function processBoxSubmissionBarcode(code, locationCode){
         document.getElementById("boxImg").src = data.image != ""?data.image:"/resources/imageTemplate.png";
         document.getElementById("boxVolumeSlider").value = data.volume != ""?data.volume:0;
         document.getElementById("boxSize").value = data.size != ""?data.size:"Small";
+        
+        await fetch(flaskAd+`pull_location/${locationCode}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+        .then(data => {
+            locName = data.name
+            document.getElementById("boxLocationInner").innerHTML = 
+            `<div class='images'>
+                <img class='locImg' src='${data.image}'>
+            </div>
+            <div class='header'>
+                <p id='boxLocName' class='locName'>${data.name}</p>
+                <p id='boxLocBarcode' class='locBarcode'>${data.barcode}</p>
+                <p class='locDescription'>${data.description}</p>
+            </div>`
+            document.getElementById("boxLocationInner").onclick = () => processLocationSubmissionBarcode(locationCode)
+        })
+        
+        itemCodes = (data.itemcode).split(",")
+        list = document.getElementById("itemsListSelectSub");
+        list.innerHTML = "";
+        for(const itemcode of itemCodes){
+            if(itemcode !== ''){
+                await fetch(flaskAd+`pull_item/${itemcode}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+                .then(item => {
+                    list.innerHTML += `<div class='mini'>
+                        <button onClick='processItemSubmissionBarcode(${item.barcode}, ${item.boxcode})'>
+                            <img src='${item.image}'>
+                            <p id='name'>${item.name}</p>
+                            <p id='code'>${item.barcode}</p>
+                            <p id='boxName'>in_${data.name}</p>
+                            <p id='location'>@${locName}</p>
+                        </button>
+                    </div>`
+                })
+            }
+        }
     })
     
-    await fetch(flaskAd+`pull_location/${locationCode}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
-    .then(data => {
-        console.log(locationCode)
-        document.getElementById("boxLocationInner").innerHTML = 
-        `<div class='images'>
-            <img class='locImg' src='${data.image}'>
-        </div>
-        <div class='header'>
-            <p id='boxLocName' class='locName'>${data.name}</p>
-            <p id='boxLocBarcode' class='locBarcode'>${data.barcode}</p>
-            <p class='locDescription'>${data.description}</p>
-        </div>`
-        document.getElementById("boxLocationInner").onclick = () => processLocationSubmissionBarcode(locationCode)
-    })
+    
     document.getElementById("boxBarcodeImg").src = getBarcodeSrc(code)+`B${code}`;
     
 }
@@ -423,7 +448,7 @@ async function changeLocation(code){
     document.getElementById("barcodeLocationInput").focus();
     let div = document.getElementById("locationsSelect")
     div.innerHTML = ``
-    document.getElementById("TitleText").innerText = 'Select a Location for B' + code 
+    document.getElementById("locationTitleText").innerText = 'Select a Location for B' + code 
     fetch(flaskAd+'pull_all_locations').then(response => response.json())  // Use .text() to read plain text
     .then(data => {
       for(const location of data.locations){
@@ -449,7 +474,7 @@ async function addItem(){
     document.getElementById("itemBarcode").style.visibility = 'visible';
     document.getElementById("barcodeItemInput").value = "";
     document.getElementById("barcodeItemInput").focus();
-    let div = document.getElementById("itemSelect");
+    let div = document.getElementById("itemsSelect");
     div.innerHTML = `<div id='add' class='mini'>
                         <button onClick='generateNewItemBarcode()'>
                             <p id="plus">+</p>
@@ -461,26 +486,29 @@ async function addItem(){
     .then(async data => {
         
       for(const item of data.items){
+       
         await fetch(flaskAd+'pull_box/'+item.boxcode).then(response => response.json()).then(async box => {
             boxName = box.name
-            await fetch(flaskAd+'pull_location/'+data.locationcode).then(response => response.json()).then(loc => {
+            await fetch(flaskAd+'pull_location/'+box.locationcode).then(response => response.json()).then(loc => {
                 locName = loc.name
+                
             })
         })
+        
         div.innerHTML += 
         `<div class='mini'>
             <button onClick='processItemSubmissionBarcode(${item.barcode}, ${item.boxcode})'>
                 <img src='${item.image}'>
                 <p id='name'>${item.name}</p>
                 <p id='code'>${item.barcode}</p>
-                <p id='box'>@_${boxName}</p>
-                <p id='location'>@_${locName}</p>
+                <p id='boxName'>in_${boxName}</p>
+                <p id='location'>@${locName}</p>
             </button>
         </div>`
       }
     })
 }
-function generateNewBoxBarcode(){
+function generateNewItemBarcode(){
     createNewItem(Math.floor(Math.random()*(Math.pow(10, 12))));
 }
 async function submitItemBarcode(){
@@ -498,6 +526,239 @@ async function submitItemBarcode(){
         }
     })
     }
+}
+async function createNewItem(code){
+    window.scrollTo(top)
+    boxErrorPopup.style.visibility = 'hidden';
+    document.getElementById("boxSubmit").onclick = () => submitBoxForItem(code)
+    document.getElementById("boxPopup").style.visibility = 'visible';
+    document.getElementById("boxBarcode").style.visibility = 'visible';
+    document.getElementById("barcodeBoxInput").value = "";
+    document.getElementById("barcodeBoxInput").focus();
+    let div = document.getElementById("boxesSelect")
+    div.innerHTML = ``
+    document.getElementById("boxTitleText").innerText = 'Select a Box for I' + code 
+    fetch(flaskAd+'pull_all_boxes').then(response => response.json())  // Use .text() to read plain text
+    .then(async data => {
+        for(const box of data.boxes){
+            await fetch(flaskAd+'pull_location/'+box.locationcode).then(response => response.json()).then(data => {
+                locName = data.name
+            })
+            div.innerHTML += 
+            `<div class='mini'>
+                <button onClick='processItemSubmissionBarcode(${code}, ${box.barcode})'>
+                    <img src='${box.image}'>
+                    <p id='name'>${box.name}</p>
+                    <p id='code'>${box.barcode}</p>
+                    <p id='location'>@${locName}</p>
+                </button>
+            </div>`
+          }
+    })
+}
+async function submitBoxForItem(itemcode){
+    let boxcode = document.getElementById('barcodeBoxInput').value
+    if(boxcode.match(/^[0-9]+$/) == null){
+        boxErrorPopup.style.visibility = boxErrorPopup.style.visibility == 'visible'?'hidden':  'visible';
+    }else{
+        locationErrorPopup.style.visibility = 'hidden';
+        await fetch(flaskAd+`pull_box/${boxcode}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+        if(data.vers == ""){
+            boxErrorPopup.style.visibility = boxErrorPopup.style.visibility == 'visible'?'hidden':  'visible';
+        }else{
+            processItemSubmissionBarcode(itemcode, boxcode);
+        }
+    })
+    }
+}
+async function processItemSubmissionBarcode(code, boxCode){
+    state.push("item")
+    imageChange = false;
+    window.scrollTo(top)
+    exitBoxPopup()
+    document.getElementById("itemPopup").style.visibility = 'visible';
+    document.getElementById("itemBarcode").style.visibility = 'hidden';
+    boxErrorPopup.style.visibility = 'hidden'
+    itemErrorPopup.style.visibility = 'hidden'
+    document.getElementById("itemInfo").style.visibility = 'visible';
+    document.getElementById("changeBoxButton").onclick = () => changeBox(code)
+    document.getElementById("includeItemName").checked = false;
+
+    
+    await fetch(flaskAd+`pull_item/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+        document.getElementById("itemNameInput").value = data.name;
+        document.getElementById("itemDescriptionInput").value = data.description;
+        document.getElementById("itemFinishDiv").innerHTML = `<button id="history" onClick="itemHistoryPopup(${code})">View History</button> 
+        <button id="finish" onClick="finishItem(${code})">finish</button>`
+        document.getElementById("itemPrintDiv").innerHTML = `<button id="print"onClick="printItemBarcode(${code})">print barcode</button>
+                        <input type="checkbox" id="includeItemName">
+                        <label id="includeNameLabel">Include Name, Box and Location</label><br>`
+        document.getElementById("imgButtonDiv").innerHTML = `<button id="imgButton" onClick="camera(${code})">Add/Change Image</button>`
+        document.getElementById("itemImg").src = data.image != ""?data.image:"/resources/imageTemplate.png";
+        document.getElementById("itemQuantityNum").innerText = data.quantity != ""?data.quantity:0;
+        document.getElementById("itemAlertNum").innerText = data.alert != ""?data.alert:0;
+    })
+    
+    await fetch(flaskAd+`pull_box/${boxCode}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(async data => {
+        locName = 0
+        await fetch(flaskAd+`pull_location/${data.locationcode}`).then(response => response.json())  // Use .text() to read plain text
+        .then(data => {
+            locName = data.name
+      })
+        document.getElementById("itemBoxInner").innerHTML = 
+        `<div class='images'>
+            <img class='boxImg' src='${data.image}'>
+        </div>
+        <div class='header'>
+            <p id='itemBoxName' class='boxName'>${data.name}</p>
+            <p id='itemBoxBarcode' class='boxBarcode'>${data.barcode}</p>
+            <p class='boxLocation' id='boxLocation'>@${locName}</p>
+        </div>`
+        document.getElementById("itemBoxInner").onclick = () => processBoxSubmissionBarcode(boxCode, data.locationcode)
+    })
+    document.getElementById("boxBarcodeImg").src = getBarcodeSrc(code)+`B${code}`;
+    
+}
+function itemQuantityChange(change){
+    let num = document.getElementById("itemQuantityNum")
+    num.innerText = (Math.max(0, parseInt(num.innerText) + change));
+}
+async function changeBoxForItem(itemcode){
+    let code = document.getElementById('barcodeBoxInput').value
+    if(code.match(/^[0-9]+$/) == null){
+        boxErrorPopup.style.visibility = bErrorPopup.style.visibility == 'visible'?'hidden':  'visible';
+    }else{
+        boxErrorPopup.style.visibility = 'hidden';
+        await fetch(flaskAd+`pull_box/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+        if(data.vers == ""){
+            boxErrorPopup.style.visibility = boxErrorPopup.style.visibility == 'visible'?'hidden':  'visible';
+        }else{
+            editBoxItemSubmissionBarcode(itemcode, code);
+        }
+    })
+    }
+}
+async function changeBox(code){
+    window.scrollTo(top)
+    boxErrorPopup.style.visibility = 'hidden';
+    document.getElementById("boxSubmit").onclick = () => changeBoxForItem(code)
+    document.getElementById("boxPopup").style.visibility = 'visible';
+    document.getElementById("boxBarcode").style.visibility = 'visible';
+    document.getElementById("barcodeBoxInput").value = "";
+    document.getElementById("barcodeBoxInput").focus();
+    let div = document.getElementById("boxesSelect")
+    div.innerHTML = ``
+    document.getElementById("boxTitleText").innerText = 'Select a Box for I' + code 
+    fetch(flaskAd+'pull_all_boxes').then(response => response.json())  // Use .text() to read plain text
+    .then(async data => {
+        for(const box of data.boxes){
+            await fetch(flaskAd+'pull_location/'+box.locationcode).then(response => response.json()).then(data => {
+                locName = data.name
+            })
+            div.innerHTML += 
+            `<div class='mini'>
+                <button onClick='editBoxItemSubmissionBarcode(${code}, ${box.barcode})'>
+                    <img src='${box.image}'>
+                    <p id='name'>${box.name}</p>
+                    <p id='code'>${box.barcode}</p>
+                    <p id='location'>@${locName}</p>
+                </button>
+            </div>`
+          }
+    })
+}
+async function editBoxItemSubmissionBarcode(code, boxCode){
+    window.scrollTo(top)
+    exitBoxPopup();
+    document.getElementById("itemPopup").style.visibility = 'visible';
+    document.getElementById("itemBarcode").style.visibility = 'hidden';
+    boxErrorPopup.style.visibility = 'hidden'
+    itemErrorPopup.style.visibility = 'hidden'
+    document.getElementById("itemInfo").style.visibility = 'visible';
+    document.getElementById("changeBoxButton").onclick = () => changeBox(code)
+    await fetch(flaskAd+`pull_box/${boxCode}`, {method: 'GET'}).then(response => response.json())
+    .then(async data => {
+        locName = 0
+        await fetch(flaskAd+`pull_location/${data.locationcode}`).then(response => response.json())  // Use .text() to read plain text
+        .then(data => {
+            locName = data.name
+      })
+        document.getElementById("itemBoxInner").innerHTML = 
+        `<div class='images'>
+            <img class='boxImg' src='${data.image}'>
+        </div>
+        <div class='header'>
+            <p id='itemBoxName' class='boxName'>${data.name}</p>
+            <p id='itemBoxBarcode' class='boxBarcode'>${data.barcode}</p>
+            <p class='boxLocation' id='boxLocation'>@${locName}</p>
+        </div>`
+        document.getElementById("boxLocationInner").onclick = () => processLocationSubmissionBarcode(locationCode)
+    })
+}
+async function finishItem(code){
+    let im = document.getElementById("itemImg").src
+    if(!imageChange && im.endsWith("/resources/imageTemplate.png")){
+        im = "/resources/imageTemplate.png"
+    }
+    const data = {
+        "barcode": code,
+        "name": document.getElementById("itemNameInput").value,
+        "description": document.getElementById("itemDescriptionInput").value,
+        "quantity":  parseInt(document.getElementById("itemQuantityNum").innerText),
+        "boxcode": parseInt(document.getElementById("itemBoxBarcode").innerText),
+        "alert": parseInt(document.getElementById("itemAlertNum").innerText),
+        "image": im,
+        "imageChange": imageChange?'y':'n'
+                    
+    };
+    await fetch(flaskAd+`write_item`, {method: 'POST', headers: {'Content-Type': 'application/json'},body: JSON.stringify(data)})
+    .then(data =>  {
+      exitBoxPopup();
+      try{
+        updateBoxes();
+      }catch(error){
+        console.log("nothing :)")
+      }
+    })
+}
+function itemAlertChange(change){
+    let num = document.getElementById("itemAlertNum")
+    num.innerText = (Math.max(0, parseInt(num.innerText) + change));
+}
+async function itemHistoryPopup(code){
+    document.getElementById("itemHistoryPopup").style.visibility = 'visible';
+    div = document.getElementById("itemHistoryDiv");
+    div.innerHTML = `<div id="titleDiv"><p class='title'>History</p></div>
+                <div id="headerEntry" class="entry">
+                    <b id='imageDiv' class='subEntry'>Image</b>
+                    <b id='nameDiv' class='subEntry'>Name</b>
+                    <b id='descriptionDiv' class='subEntry'>Description</b>
+                    <b id='quantityDiv' class='subEntry'>Quantity</b>
+                    <b id='boxDiv' class='subEntry'>Boxcode</b>
+                    <b id='alertDiv' class='subEntry'>Alert Quantity</b>
+                    <b id='timeDiv' class='subEntry'>Time</b>
+                    <b id='versDiv' class='subEntry'>Version</b>
+                </div>`
+    await fetch(flaskAd+`pull_item_history/${code}`, {method: 'GET'}).then(response => response.json())  // Use .text() to read plain text
+    .then(data => {
+        for(const item of data.items){
+            div.innerHTML += `<div id="headerEntry" class="entry">
+            <img id='imageDiv' class='subEntry' src='${item.image}'>
+            <p id='nameDiv' class='subEntry'>${item.name}</p>
+            <p id='descriptionDiv' class='subEntry'>${item.description}</p>
+            <p id='quantityDiv' class='subEntry'>${item.quantity}</p>
+            <p id='boxDiv' class='subEntry'>${item.boxcode}</p>
+            <p id='alertDiv' class='subEntry'>${item.alert}</p>
+            <p id='timeDiv' class='subEntry'>${item.time}</p>
+            <p id='versDiv' class='subEntry'>${item.vers}</p>
+        </div>`
+        }
+
+    });
 }
 
 function getBarcodeSrc(code){
@@ -519,7 +780,7 @@ function printLocationBarcode(code){
   };
 }
 function printBoxBarcode(code){
-    var imageUrl = getBarcodeSrc(code)+ `B${code}` + (document.getElementById("includeBoxName").checked?`_${document.getElementById("boxNameInput").value}_@L_${document.getElementById("boxLocName").innerText}`:``);
+    var imageUrl = getBarcodeSrc(code)+ `B${code}` + (document.getElementById("includeBoxName").checked?`_${document.getElementById("boxNameInput").value}_@${document.getElementById("boxLocName").innerText}`:``);
     var printWindow = window.open('', '_blank', 'width=600,height=600');
 
     printWindow.document.write('<html><head><title>Print Image</title></head><body>');
@@ -532,7 +793,20 @@ function printBoxBarcode(code){
     printWindow.close(); 
   };
 }
+function printItemBarcode(code){
+    var imageUrl = getBarcodeSrc(code)+ `I${code}` + (document.getElementById("includeItemName").checked?`_${document.getElementById("itemNameInput").value}_in_${document.getElementById("itemBoxName").innerText}_${document.getElementById("boxLocation").innerText}`:``);
+    var printWindow = window.open('', '_blank', 'width=600,height=600');
 
+    printWindow.document.write('<html><head><title>Print Image</title></head><body>');
+    printWindow.document.write('<img src="' + imageUrl + '" style="width:100%;height:auto;"/>');
+    printWindow.document.write('</body></html>');
+    
+    printWindow.document.close();  
+    printWindow.onload = function() {
+    printWindow.print();
+    printWindow.close(); 
+  };
+}
 
 function exitLocationPopup(){
     if(peek() === 'loc'){
@@ -578,7 +852,13 @@ function exitLocationHistoryPopup(){
 function exitBoxHistoryPopup(){
     document.getElementById("boxHistoryPopup").style.visibility = 'hidden';
 }
-
+function exitItemHistoryPopup(){
+    document.getElementById("itemHistoryPopup").style.visibility = 'hidden';
+}
+function exitSearchPopup(){
+    document.getElementById("searchPopup").style.visibility = 'hidden';
+    document.getElementById("searchBar").value = "";
+}
 
 
 
@@ -664,4 +944,157 @@ function save(){
     document.getElementById(peek()+"Img").src = data;
     imageChange = true;
     exitCameraPopup();
+}
+
+async function updateAlerts(){
+    let div = document.getElementById("items")
+    
+    div.innerHTML = "";
+    await fetch(flaskAd+'pull_all_items').then(response => response.json())  // Use .text() to read plain text
+    .then(async data => {
+        //<p class='boxLocation'>${box.locationcode}</p>
+      for(const item of data.items){
+        if(item.quantity <= item.alert){
+                
+                locName = 0
+                await fetch(flaskAd+`pull_box/${item.boxcode}`).then(response => response.json())  // Use .text() to read plain text
+                .then(async box => {
+                    boxName = box.name
+                    await fetch(flaskAd+`pull_location/${box.locationcode}`).then(response => response.json())  // Use .text() to read plain text
+                    .then(async loc => {
+                    locName = loc.name
+            })
+            })
+                div.innerHTML += 
+                `<div class='itemy a' id='${item.barcode}'>
+                    <div class='images'>
+                        <img class='itemImg' src='${item.image}'>
+                    </div>
+                    <div class='header'>
+                        <p class='itemName'>${item.name}</p>
+                        <p class='itemBarcode'>${item.barcode}</p>
+                        <p class='itemDescription'>${item.description}</p>
+                        <p class='itemBox'>in _${boxName}_@${locName}</p>
+                        <p class='itemName'>${item.quantity} remaining</p>
+                    </div>
+                    <div class='itemArrowDiv'>
+                        <div class='itemArrowSVG'>
+                            <img onClick='processItemSubmissionBarcode(${item.barcode}, ${item.boxcode})' src='/resources/edit-button-svgrepo-com.png'>
+                        </div>
+                    </div>
+                </div>`
+        }
+      }
+    })
+    
+}
+
+async function search() {
+    query = document.getElementById("searchBar").value
+    document.getElementById("searchPopup").style.visibility = 'visible'
+    empty = 0;
+    
+    fetch(flaskAd+'search/'+query, {method: 'GET'}).then(response => response.json())
+    .then(async data => {
+        console.log(data)
+        div = document.getElementById("itemsSearch")
+        if(data.items.length != 0){
+            div.innerHTML = "<p id='head'>Items: </p>"
+            for(const item of data.items){
+                locName = ""
+                await fetch(flaskAd+`pull_box/${item.boxcode}`).then(response => response.json())  // Use .text() to read plain text
+                .then(async box => {
+                    boxName = box.name
+                    await fetch(flaskAd+`pull_location/${box.locationcode}`).then(response => response.json())  // Use .text() to read plain text
+                    .then(async loc => {
+                    locName = loc.name
+              })
+              })
+                div.innerHTML += 
+                `<div class='itemy ${item.quantity <= item.alert?'a':''}' id='${item.barcode}'>
+                    <div class='images'>
+                        <img class='itemImg' src='${item.image}'>
+                    </div>
+                    <div class='header'>
+                        <p class='itemName'>${item.name}</p>
+                        <p class='itemBarcode'>${item.barcode}</p>
+                        <p class='itemDescription'>${item.description}</p>
+                        <p class='itemBox'>in _${boxName}_@${locName}</p>
+                        <p class='itemName'>${item.quantity} remaining</p>
+                    </div>
+                    <div class='itemArrowDiv'>
+                        <div class='itemArrowSVG'>
+                            <img onClick='processItemSubmissionBarcode(${item.barcode}, ${item.boxcode})' src='/resources/edit-button-svgrepo-com.png'>
+                        </div>
+                    </div>
+                </div>`
+              }
+        }else{
+            div.innerHTML = ""
+            empty += 1;
+        }
+        div = document.getElementById("boxesSearch")
+        if(data.boxes.length != 0){
+            
+            div.innerHTML = "<p id='head'>Boxes: </p>"
+            for(const box of data.boxes){
+                locName = ""
+                await fetch(flaskAd+`pull_location/${box.locationcode}`).then(response => response.json())  // Use .text() to read plain text
+                .then(data => {
+                    locName = data.name
+            })
+                div.innerHTML += 
+                `<div class='boxy' id='${box.barcode}'>
+                    <div class='images'>
+                        <img class='boxImg' src='${box.image}'>
+                    </div>
+                    <div class='header'>
+                        <p class='boxName'>${box.name}</p>
+                        <p class='boxBarcode'>${box.barcode}</p>
+                        <p class='boxLocation'>@${locName}</p>
+                    </div>
+                    <div class='boxArrowDiv'>
+                        <div class='boxArrowSVG'>
+                            <img onClick='processBoxSubmissionBarcode(${box.barcode}, ${box.locationcode})' src='/resources/edit-button-svgrepo-com.png'>
+                        </div>
+                    </div>
+                </div>`
+            }
+        }else{
+            div.innerHTML = ""
+            empty += 1;
+        }
+        div = document.getElementById("locationsSearch")
+        if(data.locations.length != 0){
+            
+            div.innerHTML = "<p id='head'>Locations: </p>"
+            for(const location of data.locations){
+                // console.log(location.image)
+                div.innerHTML += 
+                `<div class='location' id='${location.barcode}'>
+                    <div class='images'>
+                        <img class='locImg' src='${location.image}'>
+                    </div>
+                    <div class='header'>
+                        <p class='locName'>${location.name}</p>
+                        <p class='locBarcode'>${location.barcode}</p>
+                        <p class='locDescription'>${location.description}</p>
+                    </div>
+                    <div class='locArrowDiv'>
+                        <div class='locArrowSVG'>
+                            <img onClick='processLocationSubmissionBarcode(${location.barcode})' src='/resources/edit-button-svgrepo-com.png'>
+                        </div>
+                    </div>
+                </div>`
+              }
+        }else{
+            div.innerHTML = ""
+            empty += 1;
+        }
+        if(empty == 3){
+            document.getElementById("searchHeader").innerText = `No Results for '${document.getElementById("searchBar").value}'`
+        }else{
+            document.getElementById("searchHeader").innerText = `Search Results for '${document.getElementById("searchBar").value}':`
+        }
+    })
 }

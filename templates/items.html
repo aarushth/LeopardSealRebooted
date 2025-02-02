@@ -2,51 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/static/index.css" />
-    <link rel="stylesheet" href="/static/popups.css" />
+    <link rel="stylesheet" href="/static/popups.css"/>
+    <link rel="stylesheet" href="/static/items.css" />
+
     <script defer src="/static/index.js"></script>
+    <script defer src="/static/items.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Tracker</title>
+    <title>Items</title>
 </head>
 <body>
     <div id="main">
-        <div id="input" class="box">
-            <div id="search">
-                <input id="searchBar" placeholder="Search For Something">
-                <button onclick="search()">search</button>
-            </div>
-            <p class="title">Quick Actions</p>     
-            <div id="buttons">
-                <button onclick="location.href='/templates/locations.html'">Locations</button>
-                <button onClick="location.href='/templates/boxes.html'">Boxes</button>
-                <button onclick="location.href='/templates/items.html'">Items</button>
-                
-                <button onClick="printDB()">Print Database</button>
-                <button onClick="resetDB()">Reset Database</button>
+        <div id="itemsMain" class="box">
+            <div id="header">
+                <div id="buttonDiv">
+                    <button id="Home" onclick="location.href='../index.html'">Home</button>
+                </div>
+                <p>Items</p>
             </div>
             
-            <div id="alerts">
-                <p class="title">You are low on:</p>
-                <div id="items"></div>
-            </div>
+            <div id="items"></div>
         </div>
+    </div>
 
-        
-    </div>
-    <div id="searchPopup" class="popup">
-        
-        <div class="container">
-            <div class="xButtonDiv">
-                <button onClick="exitSearchPopup()"class="x">X</button>
-            </div>
-            <div id="searchDiv">
-                <p id="searchHeader" class="title">Search Results for :</p>
-                <div id="itemsSearch" class="search"></div>
-                <div id="boxesSearch" class="search"></div>
-                <div id="locationsSearch" class="search"></div>
-            </div> 
-        </div>
-    </div>
     <div id="itemPopup" class="popup">
         
         <div class="container">
@@ -362,6 +339,4 @@
             </div>
         </div>
     </div>
-
-    
 </body>

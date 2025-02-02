@@ -11,7 +11,6 @@ window.onbeforeunload = function () {
 
 async function updateBoxes(){
     let div = document.getElementById("boxes")
-    
     div.innerHTML =
     `<div id='AddButtonDiv'>
         <button onClick='addBox()'>
@@ -41,7 +40,7 @@ async function updateBoxes(){
             <div class='header'>
                 <p class='boxName'>${box.name}</p>
                 <p class='boxBarcode'>${box.barcode}</p>
-                <p class='boxLocation'>@${locName}_${box.locationcode}</p>
+                <p class='boxLocation'>@${locName}</p>
             </div>
             <div class='boxArrowDiv'>
                 <div class='boxArrowSVG'>

@@ -92,7 +92,7 @@ button:hover{
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
         }
-        .bosBarcode{
+        .boxBarcode{
             display:flex;
             
             font-size: 0.9vw;

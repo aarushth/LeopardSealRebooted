@@ -25,6 +25,83 @@
             </div>
         </div>
     </div>
+    <div id="itemPopup" class="popup">
+        
+        <div class="container">
+            <div class="xButtonDiv">
+                <button onClick="exitItemPopup()"class="x">X</button>
+            </div>
+            <div id="itemBarcode">
+                <div id="scan">
+                    <input placeholder="Scan Barcode" id="barcodeItemInput">
+                    <p></p>
+                    <button id="submit" onClick="submitItemBarcode()">submit
+                        <span id="itemErrorPopup" class="errorPopup">Invalid Barcode</span>
+                    </button>
+                </div>
+                <p class="or">OR</p>
+                <div id="select" class="selectMain">
+                    <p>Select item:</p>
+                    <div id="itemsSelect" class="selectSub">
+                    </div>
+                </div>
+            </div>
+            <div id="itemInfo">
+                <div id="topDiv">
+                    <img id="itemImg" src=""></img>
+                    <div id="imgButtonDiv">
+                        <button id="imgButton" onClick="camera()">Add/Change Image</button>
+                    </div>
+                    <img id="itemBarcodeImg"></img>
+                    <div id="itemPrintDiv">
+                        <button id="print" onClick="printBarcode()">Print Barcode</button>
+                        <input type="checkbox" id="includeItemName">
+                        <label id="includeNameLabel">Include Name, Box and Location</label><br>
+                    </div>
+                </div>
+                <div id="inputDiv">
+                    <div id="left">
+                        <input placeholder="Name" id="itemNameInput">
+                        <textarea placeholder="Description" id="itemDescriptionInput"></textarea>
+                        <div id="itemQuantityDiv">
+                            <p id="quan">Quantity: </p>
+                            <button onClick="itemQuantityChange(-5)">-5</button>
+                            <button onClick="itemQuantityChange(-1)">-1</button>
+                            <p id="itemQuantityNum">0</p>
+                            <button onClick="itemQuantityChange(1)">+1</button>
+                            <button onClick="itemQuantityChange(5)">+5</button>
+                        </div>
+                    </div>
+                    <div id="right">
+                        <div id="itemBox">
+                            <p>Box:</p>
+                            <div id='itemBoxOuter'>
+                                <button id ='itemBoxInner'></button>
+                            </div>
+                            <button id ="changeBoxButton" onclick="changeBox()">Change Box</button>
+                        </div>
+
+                        
+                    </div>
+                </div>
+                <div id="finishs">
+                    <div id="itemAlertDiv">
+                        <p id="alert">Alert When Quantity is below: </p>
+                        <button onClick="itemAlertChange(-5)">-5</button>
+                        <button onClick="itemAlertChange(-1)">-1</button>
+                        <p id="itemAlertNum">0</p>
+                        <button onClick="itemAlertChange(1)">+1</button>
+                        <button onClick="itemAlertChange(5)">+5</button>
+                    </div>   
+                    <div id="itemFinishDiv">
+                        <button id="history" onClick="itemHistoryPopup()">View History</button>
+                        <button id="finish" onClick="finishItemMain()">Finish</button>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
     <div id="boxPopup" class="popup">
         
         <div class="container">
@@ -32,10 +109,11 @@
                 <button onClick="exitBoxPopup()"class="x">X</button>
             </div>
             <div id="boxBarcode">
+                <p class="or" id="boxTitleText">Select a Box</p>
                 <div id="scan">
                     <input placeholder="Scan Barcode" id="barcodeBoxInput">
                     <p></p>
-                    <button id="submit" onClick="submitBoxBarcode()">submit
+                    <button id="boxSubmit" onClick="submitBoxBarcode()">submit
                         <span id="boxErrorPopup" class="errorPopup">Invalid Barcode</span>
                     </button>
                 </div>
@@ -64,7 +142,7 @@
                         <input placeholder="Name" id="boxNameInput">
                         <div id="boxVolumeSizeDiv">
                             <div id="boxVolumeSliderDiv">
-                                <label for="boxVolumeSlider">Volume</label>
+                                <label for="boxVolumeSlider">Volume:</label>
                                 <input type="range" min="1" max="100" value="50" class="slider" id="boxVolumeSlider">
                             </div>
 
@@ -100,7 +178,7 @@
                     
                     <div id="itemsListSelect" class="selectMain">
                         <p>items:</p>
-                        <div id="select" class="selectSub">
+                        <div id="itemsListSelectSub" class="selectSub">
                             
                             
                             
@@ -123,7 +201,7 @@
             </div>
             <div id="locationBarcode">
                 
-                <p class="or" id="TitleText">Select a Location</p>
+                <p class="or" id="locationTitleText">Select a Location</p>
                 
                 <div id="scan">
                     <input placeholder="Scan Barcode" id="barcodeLocationInput">
@@ -217,6 +295,27 @@
                     <b id='sizeDiv' class='subEntry'>Size</b>
                     <b id='locationDiv' class='subEntry'>Location</b>
                     <b id='itemDiv' class='subEntry'>Items</b>
+                    <b id='timeDiv' class='subEntry'>Time</b>
+                    <b id='versDiv' class='subEntry'>Version</b>
+                </div>
+            </div> 
+        </div>
+    </div>
+    <div id="itemHistoryPopup" class="popup">
+        
+        <div class="container">
+            <div class="xButtonDiv">
+                <button onClick="exitItemHistoryPopup()"class="x">X</button>
+            </div>
+            <div id="itemHistoryDiv">
+                <div id="titleDiv"><p class='title'>History</p></div>
+                <div id="headerEntry" class="entry">
+                    <b id='imageDiv' class='subEntry'>Image</b>
+                    <b id='nameDiv' class='subEntry'>Name</b>
+                    <b id='descriptionDiv' class='subEntry'>Description</b>
+                    <b id='quantityDiv' class='subEntry'>Quantity</b>
+                    <b id='boxDiv' class='subEntry'>Boxcode</b>
+                    <b id='alertDiv' class='subEntry'>Alert Quantity</b>
                     <b id='timeDiv' class='subEntry'>Time</b>
                     <b id='versDiv' class='subEntry'>Version</b>
                 </div>
